@@ -34,8 +34,6 @@ app.get('/:page', (req, res) => {
   });
 });
 
-// Usar as rotas do api.js para qualquer caminho que comece com /api
-app.use('/api', apiRoutes);
 
 // Rota para lidar com erros 404 e enviar a página de erro personalizada
 app.use((req, res, next) => {
