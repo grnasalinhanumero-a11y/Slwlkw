@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Perdido no Espaço | Iracemaflix</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#E50914',
+                        space: '#050505',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #050505;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Animated Stars Background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Astronaut Animation */
+        .astronaut {
+            width: 250px;
+            animation: float 6s infinite ease-in-out;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(5deg); }
+        }
+
+        /* 404 Text Glow */
+        .error-code {
+            font-size: 12rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(to bottom, #ffffff 30%, #444444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 30px rgba(255,255,255,0.1));
+        }
+
+        .btn-home {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .btn-home:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
+        }
+
+        .btn-home::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.6s ease-out;
+        }
+
+        .btn-home:hover::after {
+            transform: scale(1);
+        }
+
+        @media (max-width: 768px) {
+            .error-code { font-size: 8rem; }
+            .astronaut { width: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars-container" id="stars"></div>
+
+    <div class="relative z-10 container mx-auto px-6 text-center">
+        <div class="flex flex-col items-center">
+            <!-- Animated Astronaut -->
+            <div class="mb-8">
+                <svg class="astronaut" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#E0E0E0" d="M362.7 154.3c-15.5-31.1-47.3-52.3-84.1-52.3s-68.6 21.2-84.1 52.3c-7.9 15.8-12.3 33.6-12.3 52.3s4.4 36.5 12.3 52.3c15.5 31.1 47.3 52.3 84.1 52.3s68.6-21.2 84.1-52.3c7.9-15.8 12.3-33.6 12.3-52.3s-4.4-36.5-12.3-52.3z"/>
+                    <path fill="#212121" d="M336.7 172.3c-10.7-21.4-32.7-36.3-58.1-36.3s-47.4 14.9-58.1 36.3c-5.5 11-8.5 23.3-8.5 36.3s3 25.3 8.5 36.3c10.7 21.4 32.7 36.3 58.1 36.3s47.4-14.9 58.1-36.3c5.5-11 8.5-23.3 8.5-36.3s-3-25.3-8.5-36.3z"/>
+                    <path fill="#FFFFFF" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 472c-119.3 0-216-96.7-216-216S136.7 40 256 40s216 96.7 216 216-96.7 216-216 216z"/>
+                    <circle fill="#FFFFFF" cx="230" cy="180" r="15"/>
+                </svg>
+            </div>
+
+            <h1 class="error-code">404</h1>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Vixe baitola, temos um problema.</h2>
+            <p class="text-white/60 text-lg md:text-xl mb-12 max-w-lg mx-auto">
+                A página que você está procurando entrou em um buraco negro ou nunca existiu nesta galáxia.
+            </p>
+
+            <a href="iracemaflix_premium.html" class="btn-home bg-primary px-10 py-4 rounded-full font-bold text-lg inline-flex items-center gap-3">
+                <i class="fas fa-rocket"></i>
+                Voltar para a Base
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Create stars dynamically
+        const starsContainer = document.getElementById('stars');
+        const starCount = 150;
+
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            const size = Math.random() * 3;
+            const posX = Math.random() * 100;
+            const posY = Math.random() * 100;
+            const duration = 2 + Math.random() * 4;
+            const delay = Math.random() * 5;
+
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${posX}%`;
+            star.style.top = `${posY}%`;
+            star.style.setProperty('--duration', `${duration}s`);
+            star.style.animationDelay = `${delay}s`;
+
+            starsContainer.appendChild(star);
+        }
+    </script>
+
+</body>
+</html>
