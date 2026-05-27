@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark h-full antialiased scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Iracemaflix - Assistir Online</title>
+    
+    <script type="text/javascript">
+        !(function(){
+            try{
+                var s=localStorage.getItem("theme");
+                var d=s?s==="dark":true;
+                d&&document.documentElement.classList.add("dark");
+            }catch(e){}
+        })();
+    </script>
+    
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTgwJSIgcng9IjQwIiBmaWxsPSIjMzQ4Y2ZlIi8+PHRleHQgeD0iNTAlIiB5PSI1NCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC1zaXplPSI2OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2ZmZmZmZiI+SUY8L3RleHQ+PC9zdmc+" sizes="32x32">
+    
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { lead: '#348cfe', 'dark-bg': 'rgb(5,5,5)' },
+                    animation: { 'rgb-border': 'rgb-border 3s linear infinite' },
+                    keyframes: { 'rgb-border': { '0%': { 'border-color': '#ff0000' }, '33%': { 'border-color': '#00ff00' }, '66%': { 'border-color': '#0000ff' }, '100%': { 'border-color': '#ff0000' } } }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Montserrat',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#050505;
+    color:#fff;
+    overflow-x:hidden;
+}
+
+.no-scrollbar::-webkit-scrollbar{
+    display:none;
+}
+
+.no-scrollbar{
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+}
+
+header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:999;
+    background:rgba(5,5,5,.75);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+#heroSlider{
+    position:relative;
+    width:100%;
+    height:78vh;
+    min-height:620px;
+    max-height:820px;
+}
+
+#heroContainer{
+    position:absolute;
+    inset:0;
+}
+
+.hero-slider-item{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transition:opacity .7s ease;
+    background-size:cover;
+    background-position:center;
+    transform:scale(1.05);
+}
+
+.hero-slider-item.active{
+    opacity:1;
+}
+
+.hero-gradient{
+    position:absolute;
+    inset:0;
+    z-index:5;
+    background:
+    linear-gradient(
+        to top,
+        rgb(5,5,5) 5%,
+        rgba(5,5,5,.85) 25%,
+        rgba(5,5,5,.45) 55%,
+        rgba(0,0,0,.35) 100%
+    );
+}
+
+.hero-content-wrapper{
+    position:relative;
+    z-index:20;
+    height:100%;
+    display:flex;
+    align-items:flex-end;
+    padding-bottom:110px;
+}
+
+.hero-title{
+    font-size:clamp(2.8rem,7vw,6rem);
+    font-weight:900;
+    line-height:.92;
+    margin-bottom:24px;
+    max-width:700px;
+}
+
+.hero-overview{
+    color:#d1d5db;
+    max-width:620px;
+    line-height:1.7;
+    font-size:1rem;
+    margin-bottom:24px;
+}
+
+.hero-play-btn{
+    background:#348cfe;
+    color:#fff;
+    border:none;
+    outline:none;
+    padding:14px 28px;
+    border-radius:18px;
+    font-weight:800;
+    font-size:1rem;
+    cursor:pointer;
+    transition:.25s;
+    box-shadow:0 0 30px rgba(52,140,254,.45);
+}
+
+.hero-play-btn:hover{
+    transform:scale(1.05);
+}
+
+.hero-thumbs-wrapper{
+    position:absolute;
+    right:40px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:30;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:15px;
+}
+
+#heroThumbs{
+    display:flex;
+    gap:12px;
+}
+
+.preview-thumb{
+    width:58px;
+    height:84px;
+    border-radius:14px;
+    overflow:hidden;
+    border:2px solid transparent;
+    opacity:.6;
+    transition:.25s;
+    cursor:pointer;
+}
+
+.preview-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.preview-thumb.active{
+    border-color:#348cfe;
+    opacity:1;
+    transform:scale(1.08);
+}
+
+main section{
+    position:relative;
+    z-index:10;
+}
+
+section h2{
+    font-size:2rem;
+    font-weight:900;
+}
+
+.carousel-container,
+#top10Container,
+#moviesCarousel,
+#seriesCarousel,
+#channelsCarousel,
+#doramasCarousel,
+#launchCarousel,
+#liveCarousel,
+#liveEventsCarousel{
+    display:flex;
+    gap:18px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-behavior:smooth;
+    padding-bottom:10px;
+}
+
+.card-item{
+    flex:0 0 auto;
+    width:185px;
+    min-width:185px;
+    position:relative;
+}
+
+.poster-wrapper{
+    width:100%;
+    aspect-ratio:2/3;
+    border-radius:20px;
+    overflow:hidden;
+    background:#111;
+    box-shadow:0 15px 35px rgba(0,0,0,.45);
+}
+
+.poster-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform .35s ease;
+}
+
+.card-item:hover .poster-img{
+    transform:scale(1.08);
+}
+
+.rating-badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:38px;
+    height:38px;
+    background:rgba(5,5,5,0.85);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:25;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.rating-circle svg{
+    width:100%;
+    height:100%;
+    transform:rotate(-90deg);
+}
+
+.rating-circle-text{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:9px;
+    font-weight:900;
+    color: #fff;
+}
+
+.card-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.badge {
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.badge-quality {
+    color: #348cfe;
+    border-color: rgba(52, 140, 254, 0.3);
+    background: rgba(52, 140, 254, 0.05);
+}
+
+.badge-type {
+    color: #fff;
+    background: rgba(52, 140, 254, 0.2);
+    border-color: #348cfe;
+}
+
+.channel-card{
+    flex:0 0 auto;
+    width:120px;
+    min-width:120px;
+}
+
+.channel-logo-wrapper{
+    width:100%;
+    aspect-ratio:1/1;
+    background:#fff;
+    border-radius:25px;
+    padding:18px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.channel-logo-wrapper img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+.top10-rank{
+    font-size:100px;
+    font-weight:900;
+    color:transparent;
+    -webkit-text-stroke:2px rgba(255,255,255,.75);
+    line-height:.8;
+}
+
+footer{
+    margin-top:60px;
+}
+
+.desktop-nav{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    padding:6px;
+    border-radius:999px;
+    backdrop-filter:blur(10px);
+}
+
+.desktop-nav a{
+    color:#fff;
+    text-decoration:none;
+    padding:10px 14px;
+    border-radius:999px;
+    font-size:.75rem;
+    font-weight:700;
+    transition:.25s;
+}
+
+.desktop-nav a:hover{
+    background:rgba(255,255,255,.08);
+}
+
+/* Barra de Navegação Mobile */
+.mobile-nav{
+    position:fixed;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    width:calc(100% - 20px);
+    max-width:600px;
+    height:64px;
+    background:rgba(10,10,10,.92);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+    display:none;
+    align-items:center;
+    justify-content:space-around;
+    z-index:9999;
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
+    padding: 0 10px;
+    overflow-x:auto;
+}
+
+.mobile-nav::-webkit-scrollbar{
+    display:none;
+}
+
+.mobile-nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    color:rgba(255,255,255,.5);
+    text-decoration:none;
+    font-size:.6rem;
+    font-weight:700;
+    transition:.25s;
+    flex:0 0 auto;
+    height:100%;
+    padding:0 8px;
+    white-space:nowrap;
+}
+
+.mobile-nav-item i{
+    font-size:1rem;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover{
+    color:#348cfe;
+}
+
+@media(max-width:768px){
+    .hero-thumbs-wrapper{
+        right:18px;
+        top:auto;
+        bottom:25px;
+        transform:none;
+    }
+}
+
+#heroSlider .container{
+    position:relative;
+    z-index:30;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+}
+#heroPlayBtn{
+    position:relative;
+    z-index:50;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:auto;
+    min-width:200px;
+    max-width:220px;
+    padding:14px 26px;
+    border-radius:16px;
+    font-size:15px;
+    font-weight:800;
+    margin-top:10px;
+    flex:none;
+}
+#heroSlider .max-w-2xl{
+    position:relative;
+    z-index:40;
+    max-width:620px;
+}
+#heroOverview{
+    max-width:620px;
+    margin-bottom:22px;
+}
+
+.event-card {
+    flex: 0 0 auto;
+    width: 280px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 15px;
+    transition: 0.3s;
+}
+.event-card:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: #348cfe;
+}
+.event-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Estilos para o modal de busca */
+.search-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.search-modal.active {
+    display: flex;
+}
+
+.search-modal-content {
+    background: rgba(5, 5, 5, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.search-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-modal-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.search-modal-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #348cfe;
+}
+
+.search-modal-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.search-modal-close:hover {
+    color: #348cfe;
+}
+
+.search-modal-results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.search-result-item {
+    display: flex;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 10px;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-poster {
+    width: 60px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.search-result-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-result-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.search-result-title {
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.search-result-meta {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Novos estilos para Hover e Info Extra */
+.card-hover-info {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 20%, rgba(0,0,0,0.6) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 15px;
+    opacity: 0;
+    transition: 0.3s;
+    border-radius: 20px;
+    z-index: 20;
+}
+
+.card-item:hover .card-hover-info {
+    opacity: 1;
+}
+
+.card-hover-title {
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-hover-overview {
+    font-size: 9px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.4;
+    margin-bottom: 10px;
+    line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-hover-btn {
+    background: #348cfe;
+    color: white;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 8px;
+    border-radius: 10px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.quality-badge {
+    background: rgba(255,255,255,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 900;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+@media(max-width:768px){
+    body{
+        padding-bottom:85px;
+    }
+    #heroSlider{
+        min-height:620px;
+        height: 85vh;
+    }
+    .hero-content-wrapper{
+        align-items:flex-end;
+        padding-bottom:140px;
+        padding-top:100px;
+    }
+    .hero-overview{
+        font-size:.85rem;
+        line-height:1.5;
+        margin-bottom: 20px;
+    }
+    .hero-thumbs-wrapper{
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
+        margin-top: 15px;
+    }
+    #heroThumbs {
+        gap: 8px !important;
+    }
+    .preview-thumb{
+        width:45px;
+        height:65px;
+        border-radius: 8px;
+    }
+    .card-item{
+        width:140px;
+        min-width:140px;
+    }
+    .channel-card{
+        min-width:95px;
+    }
+    .top10-rank{
+        font-size:75px;
+    }
+    section h2{
+        font-size:1.5rem;
+    }
+    #heroPlayBtn {
+        min-width: 160px;
+        padding: 12px 20px;
+        font-size: 14px;
+        margin-top: 0;
+    }
+    .mobile-hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .mobile-nav{
+        display:flex;
+    }
+    header nav{
+        display:none !important;
+    }
+}
+    </style>
+</head>
+<body x-data="{ extrasOpen: false }" class="flex flex-col min-h-screen relative antialiased selection:bg-lead selection:text-white">
+
+<header class="transition-all duration-300 sticky top-0 z-50 bg-[rgb(5,5,5)]/80 backdrop-blur-md border-b border-white/5">
+    <div class="container xl:max-w-7xl mx-auto px-4 py-4 lg:py-6 flex items-center justify-between relative">
+        <a href="index" class="block font-black text-2xl lg:text-3xl tracking-tighter uppercase leading-none select-none text-white">Iracema<span class="text-lead">flix</span></a>
+        
+        <!-- MENU NORMAL -->
+<nav class="desktop-nav hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+
+    <a href="index" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs text-[#348cfe] bg-white/5">
+        <i class="fas fa-home"></i><span>Home</span>
+    </a>
+
+    <a href="filmes" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-film"></i><span>Filmes</span>
+    </a>
+
+    <a href="series" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-tv"></i><span>Séries</span>
+    </a>
+
+    <a href="doramas" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-heart"></i><span>Doramas</span>
+    </a>
+
+    <a href="animes" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-dragon"></i><span>Animes</span>
+    </a>
+
+    <a href="lancamentos" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-fire"></i><span>Lançamentos</span>
+    </a>
+
+    <a href="calendario" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-calendar"></i><span>Calendário</span>
+    </a>
+
+    <a href="episodios" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-list"></i><span>Episódios</span>
+    </a>
+
+    <a href="ao-vivo" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-broadcast-tower"></i><span>Ao Vivo</span>
+    </a>
+
+    <a href="canais" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all">
+        <i class="fas fa-satellite-dish"></i><span>Canais</span>
+    </a>
+
+</nav>
+        
+        <div class="flex items-center gap-3"><div class="bg-white/5 px-4 py-2 rounded-full text-[10px] font-black tracking-widest hover:bg-lead transition-all cursor-pointer" onclick="openSearchModal()"><i class="fa-solid fa-magnifying-glass"></i></div></div>
+    </div>
+</header>
+
+<!-- Barra de Navegação Mobile Inferior -->
+<div class="mobile-nav">
+    <a href="index" class="mobile-nav-item active">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+
+    <a href="filmes" class="mobile-nav-item">
+        <i class="fas fa-film"></i>
+        <span>Filmes</span>
+    </a>
+
+    <a href="series" class="mobile-nav-item">
+        <i class="fas fa-tv"></i>
+        <span>Séries</span>
+    </a>
+
+    <a href="episodios" class="mobile-nav-item">
+        <i class="fas fa-list-ol"></i>
+        <span>Episódios</span>
+    </a>
+
+    <a href="doramas" class="mobile-nav-item">
+        <i class="fas fa-heart"></i>
+        <span>Doramas</span>
+    </a>
+
+    <a href="lancamentos" class="mobile-nav-item">
+        <i class="fas fa-fire"></i>
+        <span>Lançamentos</span>
+    </a>
+
+    <a href="animes" class="mobile-nav-item">
+        <i class="fas fa-star"></i>
+        <span>Animes</span>
+    </a>
+
+    <a href="calendario" class="mobile-nav-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Calendário</span>
+    </a>
+
+    <a href="ao-vivo" class="mobile-nav-item">
+        <i class="fas fa-broadcast-tower"></i>
+        <span>Ao Vivo</span>
+    </a>
+
+    <a href="canais" class="mobile-nav-item">
+        <i class="fas fa-satellite-dish"></i>
+        <span>Canais</span>
+    </a>
+</div>
+
+<!-- Modal de Busca -->
+<div id="searchModal" class="search-modal">
+    <div class="search-modal-content">
+        <div class="search-modal-header">
+            <input type="text" id="searchInput" class="search-modal-input" placeholder="Buscar filmes, séries, canais...">
+            <button class="search-modal-close" onclick="closeSearchModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="search-modal-results" id="searchResults"></div>
+    </div>
+</div>
+
+<main class="flex-1" id="inicio">
+    <section id="heroSlider" class="relative w-full min-h-screen overflow-hidden bg-black pt-24 lg:pt-32">
+        <div id="heroContainer"></div>
+        <div class="hero-gradient absolute inset-0 z-20 pointer-events-none"></div>
+        <div class="container xl:max-w-7xl mx-auto px-4 h-full flex items-end pb-20 lg:pb-32 relative z-30">
+            <div class="max-w-2xl relative z-40">
+                <div class="flex items-center gap-3 mb-4 text-[11px] font-black uppercase tracking-widest text-lead"><span id="heroGenre">Ação • Drama</span></div>
+                <h1 id="heroTitle" class="text-4xl md:text-7xl font-black mb-6 leading-tight">Iracemaflix</h1>
+                <div class="flex items-center gap-4 mb-8 font-bold flex-wrap">
+                    <div class="rating-badge !relative !top-0 !right-0 !bg-transparent !border-0 !w-14 !h-14">
+                        <div class="rating-circle !w-full !h-full"><svg viewBox="0 0 36 36"><path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3"></path><path id="heroRatingPath" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#21d07a" stroke-width="3" stroke-linecap="round" stroke-dasharray="85, 100"></path></svg><span id="heroRatingText" class="rating-circle-text">85%</span></div>
+                    </div>
+                    <span id="heroYear" class="text-white/60 text-lg">2026</span>
+                    <span class="quality-badge">4K ULTRA HD</span>
+                    <span class="quality-badge">HDR10+</span>
+                    <span class="quality-badge">5.1</span>
+                </div>
+                <p id="heroOverview" class="text-slate-300 text-lg mb-10 line-clamp-3 leading-relaxed max-w-xl">Carregando informações...</p>
+                <div class="mobile-hero-actions">
+                    <button id="heroPlayBtn" class="bg-lead text-white px-8 py-4 rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-[0_0_30px_rgba(52,140,254,0.5)] active:scale-95 duration-200">ASSISTIR AGORA</button>
+                    <div class="hero-thumbs-wrapper">
+                        <div class="flex gap-3" id="heroThumbs"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="relative z-30 -mt-20">
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-8">
+            <div class="flex justify-between items-end mb-8"><h2 class="text-3xl font-black flex items-center gap-3"><div class="w-2 h-8 bg-lead rounded-full shadow-[0_0_15px_#348cfe]"></div> Em Alta</h2><span class="text-[11px] font-black text-white/40 uppercase tracking-widest">Top 10 hoje</span></div>
+            <div class="carousel-container no-scrollbar" id="top10Container"></div>
+        </section>
+
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-6">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="text-3xl font-black flex items-center gap-3">
+                    <div class="w-2 h-8 bg-red-600 rounded-full shadow-[0_0_15px_#dc2626]"></div>
+                    Agenda Esportiva
+                </h2>
+            </div>
+            <div class="carousel-container no-scrollbar" id="liveEventsCarousel"></div>
+        </section>
+
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-6">
+            <div class="flex justify-between items-end mb-8"><h2 class="text-3xl font-black flex items-center gap-3"><div class="w-2 h-8 bg-lead rounded-full shadow-[0_0_15px_#348cfe]"></div> Filmes</h2></div>
+            <div class="carousel-container no-scrollbar" id="moviesCarousel"></div>
+        </section>
+
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-6">
+            <div class="flex justify-between items-end mb-8"><h2 class="text-3xl font-black flex items-center gap-3"><div class="w-2 h-8 bg-lead rounded-full shadow-[0_0_15px_#348cfe]"></div> Séries</h2></div>
+            <div class="carousel-container no-scrollbar" id="seriesCarousel"></div>
+        </section>
+
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-6">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="text-3xl font-black flex items-center gap-3">
+                    <div class="w-2 h-8 bg-pink-500 rounded-full shadow-[0_0_15px_#ec4899]"></div>
+                    Doramas
+                </h2>
+            </div>
+            <div class="carousel-container no-scrollbar" id="doramasCarousel"></div>
+        </section>
+
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-6">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="text-3xl font-black flex items-center gap-3">
+                    <div class="w-2 h-8 bg-red-500 rounded-full shadow-[0_0_15px_#ef4444]"></div>
+                    Lançamentos
+                </h2>
+            </div>
+            <div class="carousel-container no-scrollbar" id="launchCarousel"></div>
+        </section>
+
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-6">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="text-3xl font-black flex items-center gap-3">
+                    <div class="w-2 h-8 bg-green-500 rounded-full shadow-[0_0_15px_#22c55e]"></div>
+                    Animes
+                </h2>
+            </div>
+            <div class="carousel-container no-scrollbar" id="liveCarousel"></div>
+        </section>
+
+        <section class="container xl:max-w-[1400px] mx-auto px-4 py-6">
+            <div class="flex justify-between items-end mb-8"><h2 class="text-3xl font-black flex items-center gap-3"><div class="w-2 h-8 bg-lead rounded-full shadow-[0_0_15px_#348cfe]"></div> Canais Premium</h2></div>
+            <div class="carousel-container no-scrollbar" id="channelsCarousel"></div>
+        </section>
+    </div>
+</main>
+
+<footer class="py-12 border-t border-white/5 text-center"><p class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">© 2026 Iracemaflix</p></footer>
+
+<script>
+const TMDB_API_KEY = '8265bd1679663a7ea12ac168da84d2e8';
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
+
+const REI_API_CHANNELS = 'https://reidosembeds.com/api/channels';
+const REI_API_EVENTS = 'https://reidosembeds.com/api/eventos';
+
+const GENRE_MAP = { 28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia', 80: 'Crime', 99: 'Documentário', 18: 'Drama', 10751: 'Família', 14: 'Fantasia', 36: 'História', 27: 'Terror', 10402: 'Música', 9648: 'Mistério', 10749: 'Romance', 878: 'Ficção científica', 10770: 'Cinema TV', 53: 'Thriller', 10752: 'Guerra', 37: 'Faroeste', 10759: 'Ação & Aventura', 10762: 'Kids', 10763: 'Notícias', 10764: 'Reality', 10765: 'Sci-Fi & Fantasy', 10766: 'Soap', 10767: 'Talk', 10768: 'War & Politics' };
+
+let heroItems = [];
+let currentHeroIndex = 0;
+let heroInterval = null;
+let searchTimeout = null;
+
+document.addEventListener('DOMContentLoaded', () => { 
+    loadHeroContent(); 
+    loadAllSections();
+    setupSearchModal();
+    setupMobileNav();
+});
+
+function setupMobileNav() {
+    const navItems = document.querySelectorAll('.mobile-nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+}
+
+function openSearchModal() {
+    document.getElementById('searchModal').classList.add('active');
+    document.getElementById('searchInput').focus();
+}
+
+function closeSearchModal() {
+    document.getElementById('searchModal').classList.remove('active');
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+}
+
+function setupSearchModal() {
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout);
+        if (query.length < 2) {
+            searchResults.innerHTML = '';
+            return;
+        }
+        searchResults.innerHTML = '<div class="search-loading"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+        searchTimeout = setTimeout(() => {
+            performSearch(query);
+        }, 300);
+    });
+    
+    document.getElementById('searchModal').addEventListener('click', (e) => {
+        if (e.target.id === 'searchModal') {
+            closeSearchModal();
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeSearchModal();
+        }
+    });
+}
+
+async function performSearch(query) {
+    try {
+        const response = await fetch(`${TMDB_BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=pt-BR`);
+        const data = await response.json();
+        const results = data.results.filter(item => item.poster_path && (item.media_type === 'movie' || item.media_type === 'tv')).slice(0, 10);
+        const searchResults = document.getElementById('searchResults');
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="search-empty">Nenhum resultado encontrado</div>';
+            return;
+        }
+        searchResults.innerHTML = results.map(item => `
+            <div class="search-result-item" onclick="window.location.href='assistir?id=${item.id}&type=${item.media_type}'">
+                <div class="search-result-poster">
+                    <img src="${TMDB_IMAGE_BASE + item.poster_path}" alt="${item.title || item.name}">
+                </div>
+                <div class="search-result-info">
+                    <div class="search-result-title">${item.title || item.name}</div>
+                    <div class="search-result-meta">${item.media_type === 'movie' ? 'Filme' : 'Série'} • ${(item.release_date || item.first_air_date || '').split('-')[0]}</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Erro na busca:', error);
+        document.getElementById('searchResults').innerHTML = '<div class="search-empty">Erro ao buscar. Tente novamente.</div>';
+    }
+}
+
+async function loadHeroContent() {
+    try {
+        const response = await fetch(`${TMDB_BASE_URL}/trending/all/week?api_key=${TMDB_API_KEY}&language=pt-BR`);
+        const data = await response.json();
+        heroItems = data.results.slice(0, 6);
+        renderHeroSlider();
+        startHeroAutoplay();
+    } catch (error) { console.error(error); }
+}
+
+function renderHeroSlider() {
+    const container = document.getElementById('heroContainer');
+    const thumbsContainer = document.getElementById('heroThumbs');
+    if(!container || !thumbsContainer) return;
+    container.innerHTML = heroItems.map((item, index) => `<div class="hero-slider-item ${index === 0 ? 'active' : ''}" style="background-image: url('${TMDB_BACKDROP_BASE + item.backdrop_path}')" data-index="${index}"></div>`).join('');
+    thumbsContainer.innerHTML = heroItems.map((item, index) => `<div onclick="goToHero(${index})" class="preview-thumb ${index === 0 ? 'active' : ''}" id="hero-thumb-${index}"><img src="${TMDB_IMAGE_BASE + item.poster_path}" class="w-full h-full object-cover"></div>`).join('');
+    updateHeroText(0);
+}
+
+function updateHeroText(index) {
+    const item = heroItems[index];
+    if (!item) return;
+    document.getElementById('heroTitle').textContent = item.title || item.name;
+    document.getElementById('heroOverview').textContent = item.overview;
+    const rating = Math.round(item.vote_average * 10);
+    document.getElementById('heroRatingPath').style.strokeDasharray = `${rating}, 100`;
+    document.getElementById('heroRatingText').textContent = `${rating}%`;
+    document.getElementById('heroYear').textContent = (item.release_date || item.first_air_date || '').split('-')[0];
+    document.getElementById('heroGenre').textContent = item.genre_ids ? item.genre_ids.slice(0, 2).map(id => GENRE_MAP[id]).filter(Boolean).join(' • ') : 'Conteúdo';
+    document.getElementById('heroPlayBtn').onclick = () => window.location.href = `assistir?id=${item.id}&type=${item.media_type === 'movie' ? 'movie' : 'tv'}`;
+}
+
+function goToHero(index) {
+    const items = document.querySelectorAll('.hero-slider-item');
+    const thumbs = document.querySelectorAll('.preview-thumb');
+    if(!items[currentHeroIndex] || !thumbs[currentHeroIndex]) return;
+    items[currentHeroIndex].classList.remove('active');
+    thumbs[currentHeroIndex].classList.remove('active');
+    items[index].classList.add('active');
+    thumbs[index].classList.add('active');
+    currentHeroIndex = index;
+    updateHeroText(index);
+    resetHeroAutoplay();
+}
+
+function startHeroAutoplay() { heroInterval = setInterval(() => goToHero((currentHeroIndex + 1) % heroItems.length), 8000); }
+function resetHeroAutoplay() { clearInterval(heroInterval); startHeroAutoplay(); }
+
+async function loadAllSections() {
+    fetch(`${TMDB_BASE_URL}/trending/all/day?api_key=${TMDB_API_KEY}&language=pt-BR`).then(r => r.json()).then(data => renderTop10(data.results.slice(0, 10)));
+    fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=pt-BR`).then(r => r.json()).then(data => renderCarousel('moviesCarousel', data.results.map(i => ({...i, media_type: 'movie'}))));
+    fetch(`${TMDB_BASE_URL}/tv/popular?api_key=${TMDB_API_KEY}&language=pt-BR`).then(r => r.json()).then(data => renderCarousel('seriesCarousel', data.results.map(i => ({...i, media_type: 'tv'}))));
+    fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&with_original_language=ko&language=pt-BR&sort_by=popularity.desc`).then(r => r.json()).then(data => renderCarousel('doramasCarousel', data.results.map(i => ({...i, media_type: 'tv'}))));
+    fetch(`${TMDB_BASE_URL}/movie/now_playing?api_key=${TMDB_API_KEY}&language=pt-BR`).then(r => r.json()).then(data => renderCarousel('launchCarousel', data.results.map(i => ({...i, media_type: 'movie'}))));
+    fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=16&language=pt-BR&sort_by=popularity.desc`).then(r => r.json()).then(data => renderCarousel('liveCarousel', data.results.map(i => ({...i, media_type: 'movie'}))));
+    loadLiveEvents();
+    loadChannels();
+}
+
+async function loadLiveEvents() {
+    try {
+        const response = await fetch(REI_API_EVENTS);
+        const data = await response.json();
+        if (data && data.success && Array.isArray(data.data)) {
+            const today = new Date().toISOString().split('T')[0];
+            const filtered = data.data.filter(e => e.start_time && e.start_time.startsWith(today));
+            filtered.sort((a, b) => (b.status === 'live' ? 1 : 0) - (a.status === 'live' ? 1 : 0));
+            renderLiveEvents(filtered);
+        } else if (data && Array.isArray(data)) {
+            const today = new Date().toISOString().split('T')[0];
+            const filtered = data.filter(e => e.start_time && e.start_time.startsWith(today));
+            filtered.sort((a, b) => (b.status === 'live' ? 1 : 0) - (a.status === 'live' ? 1 : 0));
+            renderLiveEvents(filtered);
+        } else {
+            renderLiveEvents([]);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar eventos:', error);
+        renderLiveEvents([]);
+    }
+}
+
+async function loadChannels() {
+    try {
+        const response = await fetch(REI_API_CHANNELS);
+        const data = await response.json();
+        if (data && data.success && Array.isArray(data.data)) {
+            renderChannels(data.data);
+        } else if (Array.isArray(data)) {
+            renderChannels(data);
+        } else {
+            renderChannels([]);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar canais:', error);
+        renderChannels([]);
+    }
+}
+
+function renderTop10(items) {
+    const container = document.getElementById('top10Container');
+    if(!container) return;
+    container.innerHTML = items.map((item, index) => {
+        const rating = Math.round(item.vote_average * 10);
+        const color = rating >= 70 ? '#21d07a' : rating >= 40 ? '#d2d531' : '#db2360';
+        const type = item.media_type === 'movie' ? 'Filme' : 'Série';
+        const genre = item.genre_ids ? GENRE_MAP[item.genre_ids[0]] : 'Geral';
+        
+        return `
+            <div class="card-item flex items-center !w-[280px] !min-w-[280px] group" onclick="window.location.href='assistir?id=${item.id}&type=${item.media_type}'">
+                <span class="top10-rank">${index + 1}</span>
+                <div class="poster-wrapper flex-1 relative">
+                    <div class="rating-badge">
+                        <div class="rating-circle">
+                            <svg viewBox="0 0 36 36">
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"></path>
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${rating}, 100"></path>
+                            </svg>
+                            <span class="rating-circle-text">${rating}%</span>
+                        </div>
+                    </div>
+                    <img src="${TMDB_IMAGE_BASE + item.poster_path}" class="poster-img">
+                    <div class="card-hover-info">
+                        <h3 class="card-hover-title">${item.title || item.name}</h3>
+                        <div class="flex gap-2 mb-2">
+                            <span class="badge badge-type">${type}</span>
+                            <span class="badge">${genre}</span>
+                        </div>
+                        <p class="card-hover-overview">${item.overview || 'Sem sinopse disponível.'}</p>
+                        <div class="card-hover-btn">Assistir Agora</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderCarousel(id, items) {
+    const container = document.getElementById(id);
+    if(!container) return;
+    container.innerHTML = items.map(item => {
+        const rating = Math.round(item.vote_average * 10);
+        const color = rating >= 70 ? '#21d07a' : rating >= 40 ? '#d2d531' : '#db2360';
+        const type = item.media_type === 'movie' ? 'Filme' : 'Série';
+        const genre = item.genre_ids ? GENRE_MAP[item.genre_ids[0]] : 'Geral';
+        const year = (item.release_date || item.first_air_date || '').split('-')[0];
+        
+        return `
+            <div class="card-item group" onclick="window.location.href='assistir?id=${item.id}&type=${item.media_type}'">
+                <div class="poster-wrapper relative">
+                    <div class="rating-badge">
+                        <div class="rating-circle">
+                            <svg viewBox="0 0 36 36">
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"></path>
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${rating}, 100"></path>
+                            </svg>
+                            <span class="rating-circle-text">${rating}%</span>
+                        </div>
+                    </div>
+                    <img src="${TMDB_IMAGE_BASE + item.poster_path}" class="poster-img">
+                    <div class="card-hover-info">
+                        <h3 class="card-hover-title">${item.title || item.name}</h3>
+                        <p class="card-hover-overview">${item.overview || 'Sem sinopse disponível.'}</p>
+                        <div class="card-hover-btn">Assistir Agora</div>
+                    </div>
+                </div>
+                <div class="card-meta-info">
+                    <h3 class="font-black text-[11px] uppercase tracking-tighter truncate">${item.title || item.name}</h3>
+                    <div class="card-badges">
+                        <span class="badge badge-type">${type}</span>
+                        <span class="badge">${genre}</span>
+                        <span class="badge badge-quality">4K</span>
+                    </div>
+                    <p class="text-[9px] font-bold text-white/30 uppercase italic">${year}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderLiveEvents(events) {
+    const container = document.getElementById('liveEventsCarousel');
+    if (!container) return;
+    if (!events || events.length === 0) {
+        container.innerHTML = '<p class="text-white/20 font-bold uppercase tracking-widest text-xs py-10">Nenhum evento para hoje</p>';
+        return;
+    }
+    container.innerHTML = events.map(event => {
+        const time = event.start_time ? event.start_time.split(' ')[1].substring(0, 5) : '--:--';
+        return `
+            <div class="event-card group cursor-pointer" onclick="window.location.href='tv?id=${event.id}&type=event'">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="event-badge">${event.status === 'live' ? 'Ao Vivo' : time}</span>
+                    <span class="text-[10px] font-black text-white/30 uppercase italic">${event.category || 'Esporte'}</span>
+                </div>
+                <div class="flex items-center justify-around gap-4 mb-6">
+                    <img src="${event.time1 || ''}" class="w-14 h-14 object-contain" onerror="this.src='https://placehold.co/100x100/111/FFF?text=T1'" alt="Time 1">
+                    <div class="text-xs font-black text-white/10 italic">VS</div>
+                    <img src="${event.time2 || ''}" class="w-14 h-14 object-contain" onerror="this.src='https://placehold.co/100x100/111/FFF?text=T2'" alt="Time 2">
+                </div>
+                <h3 class="text-xs font-black text-center truncate uppercase tracking-tight mb-2">${event.title || 'Evento'}</h3>
+                <div class="flex flex-col items-center gap-1">
+                    <p class="text-[9px] text-center text-lead font-black uppercase italic">${event.competition || 'Competição'}</p>
+                    <p class="text-[8px] text-white/40 font-bold uppercase">${event.channel_name || ''}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderChannels(channels) {
+    const container = document.getElementById('channelsCarousel');
+    if (!container) return;
+    if (!channels || channels.length === 0) {
+        container.innerHTML = '<p class="text-white/20 font-bold uppercase tracking-widest text-xs py-10">Nenhum canal disponível</p>';
+        return;
+    }
+    container.innerHTML = channels.map(channel => {
+        const img = channel.poster || channel.logo || '';
+        const name = channel.title || channel.name || 'Canal';
+        return `
+            <div class="channel-card group flex flex-col items-center !w-[140px] !min-w-[140px] cursor-pointer" onclick="window.location.href='tv?id=${channel.id}&type=channel'">
+                <div class="channel-logo-wrapper mb-4 shadow-2xl">
+                    <img src="${img}" class="w-full h-full object-contain" alt="${name}" onerror="this.src='https://placehold.co/150x150/111/FFF?text=${encodeURIComponent(name)}'">
+                </div>
+                <h3 class="text-[10px] font-black text-center truncate w-full uppercase tracking-tighter">${name}</h3>
+            </div>
+        `;
+    }).join('');
+}
+</script>
+</body>
+</html>
