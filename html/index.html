@@ -964,7 +964,7 @@ async function performSearch(query) {
             return;
         }
         searchResults.innerHTML = results.map(item => `
-            <div class="search-result-item" onclick="window.location.href='assistir.html?id=${item.id}&type=${item.media_type}'">
+            <div class="search-result-item" onclick="window.location.href='assistir?id=${item.id}&type=${item.media_type}'">
                 <div class="search-result-poster">
                     <img src="${TMDB_IMAGE_BASE + item.poster_path}" alt="${item.title || item.name}">
                 </div>
@@ -1009,7 +1009,7 @@ function updateHeroText(index) {
     document.getElementById('heroRatingText').textContent = `${rating}%`;
     document.getElementById('heroYear').textContent = (item.release_date || item.first_air_date || '').split('-')[0];
     document.getElementById('heroGenre').textContent = item.genre_ids ? item.genre_ids.slice(0, 2).map(id => GENRE_MAP[id]).filter(Boolean).join(' • ') : 'Conteúdo';
-    document.getElementById('heroPlayBtn').onclick = () => window.location.href = `assistir.html?id=${item.id}&type=${item.media_type === 'movie' ? 'movie' : 'tv'}`;
+    document.getElementById('heroPlayBtn').onclick = () => window.location.href = `assistir?id=${item.id}&type=${item.media_type === 'movie' ? 'movie' : 'tv'}`;
 }
 
 function goToHero(index) {
@@ -1083,7 +1083,7 @@ function renderTop10(items) {
     const container = document.getElementById('top10Container');
     if(!container) return;
     container.innerHTML = items.map((item, index) => `
-        <div class="card-item flex items-center !w-[280px] !min-w-[280px] group" onclick="window.location.href='assistir.html?id=${item.id}&type=${item.media_type}'">
+        <div class="card-item flex items-center !w-[280px] !min-w-[280px] group" onclick="window.location.href='assistir?id=${item.id}&type=${item.media_type}'">
             <span class="top10-rank">${index + 1}</span>
             <div class="poster-wrapper flex-1 relative">
                 <img src="${TMDB_IMAGE_BASE + item.poster_path}" class="poster-img">
@@ -1101,7 +1101,7 @@ function renderCarousel(id, items) {
     const container = document.getElementById(id);
     if(!container) return;
     container.innerHTML = items.map(item => `
-        <div class="card-item group" onclick="window.location.href='assistir.html?id=${item.id}&type=${item.media_type}'">
+        <div class="card-item group" onclick="window.location.href='assistir?id=${item.id}&type=${item.media_type}'">
             <div class="poster-wrapper relative">
                 <img src="${TMDB_IMAGE_BASE + item.poster_path}" class="poster-img">
                 <div class="card-hover-info">
@@ -1128,7 +1128,7 @@ function renderLiveEvents(events) {
     container.innerHTML = events.map(event => {
         const time = event.start_time ? event.start_time.split(' ')[1].substring(0, 5) : '--:--';
         return `
-            <div class="event-card group cursor-pointer" onclick="window.location.href='tv.html?id=${event.id}&type=event'">
+            <div class="event-card group cursor-pointer" onclick="window.location.href='tv?id=${event.id}&type=event'">
                 <div class="flex justify-between items-start mb-6">
                     <span class="event-badge">${event.status === 'live' ? 'Ao Vivo' : time}</span>
                     <span class="text-[10px] font-black text-white/30 uppercase italic">${event.category || 'Esporte'}</span>
@@ -1159,7 +1159,7 @@ function renderChannels(channels) {
         const img = channel.poster || channel.logo || '';
         const name = channel.title || channel.name || 'Canal';
         return `
-            <div class="channel-card group flex flex-col items-center !w-[140px] !min-w-[140px] cursor-pointer" onclick="window.location.href='tv.html?id=${channel.id}&type=channel'">
+            <div class="channel-card group flex flex-col items-center !w-[140px] !min-w-[140px] cursor-pointer" onclick="window.location.href='tv?id=${channel.id}&type=channel'">
                 <div class="channel-logo-wrapper mb-4 shadow-2xl">
                     <img src="${img}" class="w-full h-full object-contain" alt="${name}" onerror="this.src='https://placehold.co/150x150/111/FFF?text=${encodeURIComponent(name)}'">
                 </div>
