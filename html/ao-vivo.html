@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark h-full antialiased scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Ao Vivo - Iracemaflix</title>
+    <script type="text/javascript">
+        !(function(){
+            try{
+                var s=localStorage.getItem("theme");
+                var d=s?s==="dark":true;
+                d&&document.documentElement.classList.add("dark");
+            }catch(e){}
+        })();
+    </script>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTgwJSIgcng9IjQwIiBmaWxsPSIjMzQ4Y2ZlIi8+PHRleHQgeD0iNTAlIiB5PSI1NCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC1zaXplPSI2OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2ZmZmZmZiI+SUY8L3RleHQ+PC9zdmc+" sizes="32x32">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { lead: '#348cfe', 'dark-bg': 'rgb(5,5,5)' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Montserrat',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#050505;
+    color:#fff;
+    overflow-x:hidden;
+}
+
+header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:999;
+    background:rgba(5,5,5,.75);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.desktop-nav{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    padding:6px;
+    border-radius:999px;
+    backdrop-filter:blur(10px);
+}
+
+.desktop-nav a{
+    color:#fff;
+    text-decoration:none;
+    padding:10px 14px;
+    border-radius:999px;
+    font-size:.75rem;
+    font-weight:700;
+    transition:.25s;
+}
+
+.desktop-nav a:hover{
+    background:rgba(255,255,255,.08);
+}
+
+.mobile-nav{
+    position:fixed;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    width:calc(100% - 20px);
+    max-width:600px;
+    height:64px;
+    background:rgba(10,10,10,.92);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+    display:none;
+    align-items:center;
+    justify-content:space-around;
+    z-index:9999;
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
+    padding: 0 10px;
+    overflow-x:auto;
+}
+
+.mobile-nav::-webkit-scrollbar{
+    display:none;
+}
+
+.mobile-nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    color:rgba(255,255,255,.5);
+    text-decoration:none;
+    font-size:.6rem;
+    font-weight:700;
+    transition:.25s;
+    flex:0 0 auto;
+    height:100%;
+    padding:0 8px;
+    white-space:nowrap;
+}
+
+.mobile-nav-item i{
+    font-size:1rem;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover{
+    color:#348cfe;
+}
+
+.events-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+    gap:20px;
+    padding:20px 0;
+}
+
+.event-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 20px;
+    transition: 0.3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.event-card:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: #348cfe;
+    transform: translateY(-5px);
+}
+
+.event-card.live {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+}
+
+.event-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    animation: pulse 2s infinite;
+    display:inline-block;
+}
+.event-badge.upcoming {
+    background: rgba(52,140,254,0.2);
+    color: #348cfe;
+    border: 1px solid rgba(52,140,254,0.3);
+    animation: none;
+}
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.search-bar-wrap {
+    position: relative;
+    width: 100%;
+}
+.search-bar-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.3);
+    font-size: 13px;
+    pointer-events: none;
+}
+#searchInput {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 12px 16px 12px 40px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    outline: none;
+    transition: .2s;
+}
+#searchInput:focus {
+    border-color: rgba(52,140,254,0.5);
+    background: rgba(52,140,254,0.05);
+}
+
+.day-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.day-tabs::-webkit-scrollbar { display: none; }
+
+.day-tab {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 18px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: .25s;
+    white-space: nowrap;
+}
+.day-tab.active {
+    background: rgba(52,140,254,0.15);
+    border-color: #348cfe;
+}
+.day-tab .day-name {
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+}
+.day-tab.active .day-name { color: #348cfe; }
+.day-tab .day-date {
+    font-size: 18px;
+    font-weight: 900;
+    color: #fff;
+}
+.day-tab.active .day-date { color: #348cfe; }
+
+.category-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+.category-chips::-webkit-scrollbar { display: none; }
+
+.cat-chip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: .2s;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+}
+.cat-chip.active {
+    background: rgba(52,140,254,0.15);
+    border-color: #348cfe;
+    color: #348cfe;
+}
+
+.event-poster {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.skeleton {
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    height: 220px;
+    animation: pulse 1.5s infinite;
+}
+
+@media(max-width:768px){
+    body{ padding-bottom:85px; }
+    .events-grid{ grid-template-columns:1fr; }
+    .mobile-nav{ display:flex; }
+}
+    </style>
+</head>
+<body class="flex flex-col min-h-screen relative antialiased selection:bg-lead selection:text-white">
+
+<header class="transition-all duration-300 sticky top-0 z-50 bg-[rgb(5,5,5)]/80 backdrop-blur-md border-b border-white/5">
+    <div class="container xl:max-w-7xl mx-auto px-4 py-4 lg:py-6 flex items-center justify-between relative">
+        <a href="index" class="block font-black text-2xl lg:text-3xl tracking-tighter uppercase leading-none select-none text-white">Iracema<span class="text-lead">flix</span></a>
+        <nav class="desktop-nav hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <a href="index"><i class="fas fa-home"></i> Home</a>
+            <a href="ao-vivo"><i class="fas fa-broadcast-tower"></i> Ao Vivo</a>
+        </nav>
+    </div>
+</header>
+
+<main class="flex-1 pt-24 lg:pt-32">
+    <div class="container xl:max-w-[1400px] mx-auto px-4 py-8">
+        <h1 class="text-4xl font-black mb-8 flex items-center gap-3">
+            <div class="w-2 h-8 bg-red-600 rounded-full"></div>
+            Agenda Esportiva
+        </h1>
+
+        <div class="filter-bar">
+            <div class="search-bar-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar jogo, time ou competição…" oninput="applyFilters()">
+            </div>
+            <div class="day-tabs" id="dayTabs"></div>
+            <div class="category-chips" id="categoryChips"></div>
+        </div>
+
+        <div id="resultsCount" class="mb-4 text-xs font-bold text-white/30 uppercase"></div>
+        <div class="events-grid" id="eventsGrid"></div>
+    </div>
+</main>
+
+<script>
+const REI_API_EVENTS = 'https://reidosembeds.com/api/eventos';
+
+const CAT_ICONS = {
+    'Futebol': 'fas fa-futbol', 'Basquete': 'fas fa-basketball-ball', 'Tênis': 'fas fa-table-tennis',
+    'Beisebol': 'fas fa-baseball-ball', 'Hóquei': 'fas fa-hockey-puck', 'Natação': 'fas fa-swimming-pool'
+};
+
+let allEvents = [];
+let activeDay = null;
+let activeCat = 'all';
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadAllEvents();
+});
+
+async function loadAllEvents() {
+    try {
+        const response = await fetch(REI_API_EVENTS);
+        const data = await response.json();
+        allEvents = data.data || data;
+        activeDay = new Date().toISOString().split('T')[0];
+        buildDayTabs();
+        buildCategoryChips();
+        applyFilters();
+    } catch (e) { console.error(e); }
+}
+
+function buildDayTabs() {
+    const dateMap = {};
+    allEvents.forEach(e => {
+        if (e.start_time) {
+            const d = e.start_time.split(' ')[0];
+            dateMap[d] = (dateMap[d] || 0) + 1;
+        }
+    });
+    const dates = Object.keys(dateMap).sort();
+    const container = document.getElementById('dayTabs');
+    container.innerHTML = `<div class="day-tab ${activeDay==='all'?'active':''}" onclick="selectDay('all', this)"><span class="day-name">Todos</span><span class="day-date">📅</span></div>`;
+    dates.forEach(d => {
+        const tab = document.createElement('div');
+        tab.className = `day-tab ${d === activeDay ? 'active' : ''}`;
+        tab.onclick = () => selectDay(d, tab);
+        tab.innerHTML = `<span class="day-name">${d === new Date().toISOString().split('T')[0] ? 'Hoje' : d.split('-').reverse().slice(0,2).join('/')}</span><span class="day-date">${d.split('-')[2]}</span>`;
+        container.appendChild(tab);
+    });
+}
+
+function selectDay(d, el) {
+    activeDay = d;
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    buildCategoryChips();
+    applyFilters();
+}
+
+function buildCategoryChips() {
+    const dayEvents = activeDay === 'all' ? allEvents : allEvents.filter(e => e.start_time.startsWith(activeDay));
+    const cats = [...new Set(dayEvents.map(e => e.category || 'Outros'))].sort();
+    const container = document.getElementById('categoryChips');
+    container.innerHTML = `<div class="cat-chip active" onclick="selectCat('all', this)">Todos</div>`;
+    cats.forEach(c => {
+        const chip = document.createElement('div');
+        chip.className = 'cat-chip';
+        chip.onclick = () => selectCat(c, chip);
+        chip.innerHTML = `<i class="${CAT_ICONS[c] || 'fas fa-trophy'}"></i> ${c}`;
+        container.appendChild(chip);
+    });
+}
+
+function selectCat(c, el) {
+    activeCat = c;
+    document.querySelectorAll('.cat-chip').forEach(ch => ch.classList.remove('active'));
+    el.classList.add('active');
+    applyFilters();
+}
+
+function applyFilters() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allEvents;
+    if (activeDay !== 'all') filtered = filtered.filter(e => e.start_time.startsWith(activeDay));
+    if (activeCat !== 'all') filtered = filtered.filter(e => e.category === activeCat);
+    if (query) filtered = filtered.filter(e => e.title.toLowerCase().includes(query));
+
+    // Ordenação: Ao Vivo primeiro, depois por horário
+    filtered.sort((a, b) => {
+        const isALive = a.status === 'live';
+        const isBLive = b.status === 'live';
+        if (isALive && !isBLive) return -1;
+        if (!isALive && isBLive) return 1;
+        return (a.start_time || '').localeCompare(b.start_time || '');
+    });
+
+    const container = document.getElementById('eventsGrid');
+    document.getElementById('resultsCount').innerText = `${filtered.length} eventos encontrados`;
+    
+    container.innerHTML = filtered.map(e => {
+        const isLive = e.status === 'live';
+        const time = e.start_time.split(' ')[1].substring(0,5);
+        
+        // Lógica para extrair nomes e mostrar fotos
+        let names = e.title.split(' x ');
+        let t1 = names[0] || 'Time 1';
+        let t2 = names[1] || 'Time 2';
+        
+        let content = '';
+        if (e.visual_model === 'versus' || names.length > 1) {
+            content = `
+                <div class="flex items-center justify-around gap-4 mb-6">
+                    <div class="text-center flex-1">
+                        <img src="${e.time1}" class="w-16 h-16 object-contain mx-auto mb-2" onerror="this.src='https://placehold.co/100x100/111/FFF?text=?'">
+                        <p class="text-[10px] font-bold text-white/60 uppercase">${t1}</p>
+                    </div>
+                    <div class="text-xs font-black text-white/10 italic">VS</div>
+                    <div class="text-center flex-1">
+                        <img src="${e.time2}" class="w-16 h-16 object-contain mx-auto mb-2" onerror="this.src='https://placehold.co/100x100/111/FFF?text=?'">
+                        <p class="text-[10px] font-bold text-white/60 uppercase">${t2}</p>
+                    </div>
+                </div>`;
+        } else {
+            content = `<img src="${e.poster || 'https://reidosembeds.com/img/bg/bg-post-event.png'}" class="event-poster">`;
+        }
+
+        return `
+            <div class="event-card ${isLive ? 'live' : ''}" onclick="window.location.href='tv?id=${e.id}'">
+                <div class="flex justify-between mb-4">
+                    <span class="event-badge ${isLive ? '' : 'upcoming'}">${isLive ? '● Ao Vivo' : time}</span>
+                    <span class="text-[10px] font-bold text-white/20 uppercase">${e.category}</span>
+                </div>
+                ${content}
+                <h3 class="text-sm font-black text-center truncate uppercase mb-2">${e.title}</h3>
+                <p class="text-[10px] text-center text-lead font-bold uppercase italic">${e.competition}</p>
+            </div>`;
+    }).join('');
+}
+</script>
+</body>
+</html>
