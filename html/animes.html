@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark h-full antialiased scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Animes - Iracemaflix</title>
+    <script type="text/javascript">
+        !(function(){
+            try{
+                var s=localStorage.getItem("theme");
+                var d=s?s==="dark":true;
+                d&&document.documentElement.classList.add("dark");
+            }catch(e){}
+        })();
+    </script>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTgwJSIgcng9IjQwIiBmaWxsPSIjMzQ4Y2ZlIi8+PHRleHQgeD0iNTAlIiB5PSI1NCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZiIgZm9udC1zaXplPSI2OCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0iI2ZmZmZmZiI+SUY8L3RleHQ+PC9zdmc+" sizes="32x32">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { lead: '#348cfe', 'dark-bg': 'rgb(5,5,5)' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Montserrat',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#050505;
+    color:#fff;
+    overflow-x:hidden;
+}
+
+header{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:999;
+    background:rgba(5,5,5,.75);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.desktop-nav{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    padding:6px;
+    border-radius:999px;
+    backdrop-filter:blur(10px);
+}
+
+.desktop-nav a{
+    color:#fff;
+    text-decoration:none;
+    padding:10px 14px;
+    border-radius:999px;
+    font-size:.75rem;
+    font-weight:700;
+    transition:.25s;
+}
+
+.desktop-nav a:hover{
+    background:rgba(255,255,255,.08);
+}
+
+.mobile-nav{
+    position:fixed;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    width:calc(100% - 20px);
+    max-width:600px;
+    height:64px;
+    background:rgba(10,10,10,.92);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+    display:none;
+    align-items:center;
+    justify-content:space-around;
+    z-index:9999;
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
+    padding: 0 10px;
+    overflow-x:auto;
+}
+
+.mobile-nav::-webkit-scrollbar{
+    display:none;
+}
+
+.mobile-nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    color:rgba(255,255,255,.5);
+    text-decoration:none;
+    font-size:.6rem;
+    font-weight:700;
+    transition:.25s;
+    flex:0 0 auto;
+    height:100%;
+    padding:0 8px;
+    white-space:nowrap;
+}
+
+.mobile-nav-item i{
+    font-size:1rem;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover{
+    color:#348cfe;
+}
+
+.grid-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+    gap:20px;
+    padding:20px 0;
+}
+
+.card-item{
+    position:relative;
+    cursor:pointer;
+}
+
+.poster-wrapper{
+    width:100%;
+    aspect-ratio:2/3;
+    border-radius:20px;
+    overflow:hidden;
+    background:#111;
+    box-shadow:0 15px 35px rgba(0,0,0,.45);
+}
+
+.poster-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform .35s ease;
+}
+
+.card-item:hover .poster-img{
+    transform:scale(1.08);
+}
+
+.rating-badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:38px;
+    height:38px;
+    background:rgba(5,5,5,0.85);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:25;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.rating-circle svg{
+    width:100%;
+    height:100%;
+    transform:rotate(-90deg);
+}
+
+.rating-circle-text{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:9px;
+    font-weight:900;
+    color: #fff;
+}
+
+.card-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.badge {
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.badge-quality {
+    color: #348cfe;
+    border-color: rgba(52, 140, 254, 0.3);
+    background: rgba(52, 140, 254, 0.05);
+}
+
+.badge-type {
+    color: #fff;
+    background: rgba(52, 140, 254, 0.2);
+    border-color: #348cfe;
+}
+
+.card-hover-info {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 20%, rgba(0,0,0,0.6) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 15px;
+    opacity: 0;
+    transition: 0.3s;
+    border-radius: 20px;
+    z-index: 20;
+}
+
+.card-item:hover .card-hover-info {
+    opacity: 1;
+}
+
+.card-hover-title {
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-hover-overview {
+    font-size: 9px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.4;
+    margin-bottom: 10px;
+    line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-hover-btn {
+    background: #348cfe;
+    color: white;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 8px;
+    border-radius: 10px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.pagination{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    margin-top:40px;
+    flex-wrap:wrap;
+}
+
+.pagination button,
+.pagination a{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.25s;
+    font-weight:700;
+    font-size:12px;
+}
+
+.pagination button:hover,
+.pagination a:hover{
+    background:#348cfe;
+    border-color:#348cfe;
+}
+
+.pagination .active{
+    background:#348cfe;
+    border-color:#348cfe;
+}
+
+.search-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.search-modal.active {
+    display: flex;
+}
+
+.search-modal-content {
+    background: rgba(5, 5, 5, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.search-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-modal-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.search-modal-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #348cfe;
+}
+
+.search-modal-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.search-modal-close:hover {
+    color: #348cfe;
+}
+
+.search-modal-results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.search-result-item {
+    display: flex;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 10px;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-poster {
+    width: 60px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.search-result-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-result-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.search-result-title {
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.search-result-meta {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.genre-filter-bar {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 15px 0;
+    margin-bottom: 25px;
+    scroll-behavior: smooth;
+}
+
+.genre-filter-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.genre-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: 0.3s;
+    flex: 0 0 auto;
+}
+
+.genre-btn:hover,
+.genre-btn.active {
+    background: #348cfe;
+    border-color: #348cfe;
+    color: white;
+}
+
+@media(max-width:768px){
+    body{
+        padding-bottom:85px;
+    }
+    .grid-container{
+        grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+        gap:12px;
+    }
+    .mobile-nav{
+        display:flex;
+    }
+    header nav{
+        display:none !important;
+    }
+}
+    </style>
+</head>
+<body class="flex flex-col min-h-screen relative antialiased selection:bg-lead selection:text-white">
+
+<header class="transition-all duration-300 sticky top-0 z-50 bg-[rgb(5,5,5)]/80 backdrop-blur-md border-b border-white/5">
+    <div class="container xl:max-w-7xl mx-auto px-4 py-4 lg:py-6 flex items-center justify-between relative">
+        <a href="index" class="block font-black text-2xl lg:text-3xl tracking-tighter uppercase leading-none select-none text-white">Iracema<span class="text-lead">flix</span></a>
+        
+        <nav class="desktop-nav hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <a href="index" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="filmes" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all"><i class="fas fa-film"></i><span>Filmes</span></a>
+            <a href="series" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all"><i class="fas fa-tv"></i><span>Séries</span></a>
+            <a href="doramas" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all"><i class="fas fa-heart"></i><span>Doramas</span></a>
+            <a href="animes" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all"><i class="fas fa-star"></i><span>Animes</span></a>
+            <a href="ao-vivo" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all"><i class="fas fa-broadcast-tower"></i><span>Ao Vivo</span></a>
+            <a href="canais" class="group flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs hover:bg-white/10 transition-all"><i class="fas fa-satellite-dish"></i><span>Canais</span></a>
+        </nav>
+        
+        <div class="flex items-center gap-3"><div class="bg-white/5 px-4 py-2 rounded-full text-[10px] font-black tracking-widest hover:bg-lead transition-all cursor-pointer" onclick="openSearchModal()"><i class="fa-solid fa-magnifying-glass"></i></div></div>
+    </div>
+</header>
+
+<!-- Barra de Navegação Mobile Inferior -->
+<div class="mobile-nav">
+    <a href="index" class="mobile-nav-item">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+    </a>
+
+    <a href="filmes" class="mobile-nav-item">
+        <i class="fas fa-film"></i>
+        <span>Filmes</span>
+    </a>
+
+    <a href="series" class="mobile-nav-item">
+        <i class="fas fa-tv"></i>
+        <span>Séries</span>
+    </a>
+
+    <a href="episodios" class="mobile-nav-item">
+        <i class="fas fa-list-ol"></i>
+        <span>Episódios</span>
+    </a>
+
+    <a href="doramas" class="mobile-nav-item">
+        <i class="fas fa-heart"></i>
+        <span>Doramas</span>
+    </a>
+
+    <a href="lancamentos" class="mobile-nav-item">
+        <i class="fas fa-fire"></i>
+        <span>Lançamentos</span>
+    </a>
+
+    <a href="animes" class="mobile-nav-item">
+        <i class="fas fa-star"></i>
+        <span>Animes</span>
+    </a>
+
+    <a href="calendario" class="mobile-nav-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Calendário</span>
+    </a>
+
+    <a href="ao-vivo" class="mobile-nav-item">
+        <i class="fas fa-broadcast-tower"></i>
+        <span>Ao Vivo</span>
+    </a>
+
+    <a href="canais" class="mobile-nav-item active">
+        <i class="fas fa-satellite-dish"></i>
+        <span>Canais</span>
+    </a>
+</div>
+
+<!-- Modal de Busca -->
+<div id="searchModal" class="search-modal">
+    <div class="search-modal-content">
+        <div class="search-modal-header">
+            <input type="text" id="searchInput" class="search-modal-input" placeholder="Buscar animes...">
+            <button class="search-modal-close" onclick="closeSearchModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="search-modal-results" id="searchResults"></div>
+    </div>
+</div>
+
+<main class="flex-1 pt-24 lg:pt-32">
+    <div class="container xl:max-w-[1400px] mx-auto px-4 py-8">
+        <h1 class="text-4xl font-black mb-8 flex items-center gap-3">
+            <div class="w-2 h-8 bg-lead rounded-full shadow-[0_0_15px_#348cfe]"></div>
+            Animes
+        </h1>
+        
+        <div class="genre-filter-bar" id="genreFilter"></div>
+        
+        <div class="grid-container" id="animesGrid"></div>
+        
+        <div class="pagination" id="pagination"></div>
+    </div>
+</main>
+
+<footer class="py-12 border-t border-white/5 text-center"><p class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">© 2026 Iracemaflix</p></footer>
+
+<script>
+const TMDB_API_KEY = '8265bd1679663a7ea12ac168da84d2e8';
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+
+const ANIME_GENRES = [
+    { id: 10759, name: 'Ação & Aventura' },
+    { id: 16, name: 'Animação' },
+    { id: 35, name: 'Comédia' },
+    { id: 10765, name: 'Sci-Fi & Fantasy' },
+    { id: 18, name: 'Drama' },
+    { id: 9648, name: 'Mistério' },
+    { id: 10762, name: 'Kids' }
+];
+
+let currentPage = 1;
+let totalPages = 1;
+let searchTimeout = null;
+let selectedGenre = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderGenreFilter();
+    loadAnimes(1);
+    setupSearchModal();
+});
+
+function renderGenreFilter() {
+    const container = document.getElementById('genreFilter');
+    container.innerHTML = '<button class="genre-btn active" onclick="filterByGenre(null)">Todos</button>' + 
+        ANIME_GENRES.map(g => `<button class="genre-btn" onclick="filterByGenre(${g.id})">${g.name}</button>`).join('');
+}
+
+function filterByGenre(genreId) {
+    selectedGenre = genreId;
+    currentPage = 1;
+    document.querySelectorAll('.genre-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    loadAnimes(1);
+}
+
+function openSearchModal() {
+    document.getElementById('searchModal').classList.add('active');
+    document.getElementById('searchInput').focus();
+}
+
+function closeSearchModal() {
+    document.getElementById('searchModal').classList.remove('active');
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+}
+
+function setupSearchModal() {
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout);
+        if (query.length < 2) {
+            searchResults.innerHTML = '';
+            return;
+        }
+        searchResults.innerHTML = '<div class="search-loading"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+        searchTimeout = setTimeout(() => {
+            performSearch(query);
+        }, 300);
+    });
+}
+
+async function performSearch(query) {
+    try {
+        const response = await fetch(`${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=pt-BR`);
+        const data = await response.json();
+        const results = data.results.filter(item => item.poster_path).slice(0, 10);
+        const searchResults = document.getElementById('searchResults');
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="search-empty">Nenhum resultado encontrado</div>';
+            return;
+        }
+        searchResults.innerHTML = results.map(item => `
+            <div class="search-result-item" onclick="window.location.href='assistir?id=${item.id}&type=tv'">
+                <div class="search-result-poster">
+                    <img src="${TMDB_IMAGE_BASE + item.poster_path}" alt="${item.name}">
+                </div>
+                <div class="search-result-info">
+                    <div class="search-result-title">${item.name}</div>
+                    <div class="search-result-meta">Série • ${(item.first_air_date || '').split('-')[0]}</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Erro na busca:', error);
+    }
+}
+
+async function loadAnimes(page = 1) {
+    try {
+        let genres = '16';
+        if (selectedGenre && selectedGenre !== 16) {
+            genres = `16,${selectedGenre}`;
+        }
+        let url = `${TMDB_BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&with_genres=${genres}&with_original_language=ja&language=pt-BR&page=${page}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        currentPage = page;
+        totalPages = data.total_pages > 500 ? 500 : data.total_pages;
+        renderAnimes(data.results);
+        renderPagination();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        console.error('Erro ao carregar animes:', error);
+    }
+}
+
+function renderAnimes(animes) {
+    const container = document.getElementById('animesGrid');
+    container.innerHTML = animes.filter(a => a.poster_path).map(anime => {
+        const rating = Math.round(anime.vote_average * 10);
+        const color = rating >= 70 ? '#21d07a' : rating >= 40 ? '#d2d531' : '#db2360';
+        const year = (anime.first_air_date || '').split('-')[0];
+        const genre = anime.genre_ids ? (ANIME_GENRES.find(g => g.id === anime.genre_ids[0])?.name || 'Anime') : 'Anime';
+
+        return `
+            <div class="card-item group" onclick="window.location.href='assistir?id=${anime.id}&type=tv'">
+                <div class="poster-wrapper relative">
+                    <div class="rating-badge">
+                        <div class="rating-circle">
+                            <svg viewBox="0 0 36 36">
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"></path>
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-dasharray="${rating}, 100"></path>
+                            </svg>
+                            <span class="rating-circle-text">${rating}%</span>
+                        </div>
+                    </div>
+                    <img src="${TMDB_IMAGE_BASE + anime.poster_path}" class="poster-img" alt="${anime.name}">
+                    <div class="card-hover-info">
+                        <h3 class="card-hover-title">${anime.name}</h3>
+                        <p class="card-hover-overview">${anime.overview || 'Sem sinopse disponível.'}</p>
+                        <div class="card-hover-btn">Assistir Agora</div>
+                    </div>
+                </div>
+                <div class="card-meta-info">
+                    <h3 class="font-black text-[11px] uppercase tracking-tighter truncate">${anime.name}</h3>
+                    <div class="card-badges">
+                        <span class="badge badge-type">Anime</span>
+                        <span class="badge">${genre}</span>
+                        <span class="badge badge-quality">Full HD</span>
+                    </div>
+                    <p class="text-[9px] font-bold text-white/30 uppercase mt-1 italic">${year}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderPagination() {
+    const container = document.getElementById('pagination');
+    let html = '';
+    if (currentPage > 1) html += `<button onclick="loadAnimes(${currentPage - 1})">Anterior</button>`;
+    for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+        html += `<button onclick="loadAnimes(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+    }
+    if (currentPage < totalPages) html += `<button onclick="loadAnimes(${currentPage + 1})">Próxima</button>`;
+    container.innerHTML = html;
+}
+</script>
+</body>
+</html>
