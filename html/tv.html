@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark h-full antialiased scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Iracemaflix - Assistir TV</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { lead: '#348cfe', 'dark-bg': 'rgb(5,5,5)' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Montserrat',sans-serif; }
+        body { background:#050505; color:#fff; }
+        .player-aspect { position: relative; width: 100%; padding-top: 56.25%; background: #000; }
+        .player-aspect iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .btn-player { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+        .btn-player.active { background: #348cfe; border-color: #348cfe; box-shadow: 0 0 15px rgba(52, 140, 254, 0.4); }
+        .btn-player:hover:not(.active) { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="bg-[#050505] min-h-screen pb-10">
+
+<header class="bg-[rgb(5,5,5)] border-b border-white/5 sticky top-0 z-50">
+    <div class="container xl:max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="javascript:history.back()" class="bg-white/5 w-10 h-10 rounded-full flex items-center justify-center hover:bg-lead transition-all">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 id="tvTitle" class="font-black text-sm uppercase tracking-widest truncate max-w-[200px] md:max-w-md">Carregando...</h1>
+        </div>
+        <a href="/" class="block font-black text-xl tracking-tighter uppercase text-white">Iracema<span class="text-lead">flix</span></a>
+    </div>
+</header>
+
+<main class="container xl:max-w-7xl mx-auto px-4 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Player e Seleção -->
+        <div class="lg:col-span-2 space-y-6">
+            <div id="playerWrapper" class="player-aspect rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10 bg-black">
+                    <div class="w-12 h-12 border-4 border-lead border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Conectando ao sinal...</p>
+                </div>
+                <div id="iframeContainer" class="w-full h-full hidden"></div>
+            </div>
+
+            <!-- Botões de Player -->
+            <div id="playerSelector" class="hidden space-y-4">
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-2">
+                    <i class="fas fa-play-circle text-lead"></i> Escolha um Player
+                </h3>
+                <div id="playerButtons" class="flex flex-wrap gap-3"></div>
+            </div>
+        </div>
+
+        <!-- Info do Jogo/Canal -->
+        <div class="space-y-6">
+            <div id="infoCard" class="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6 hidden">
+                <div id="itemPoster" class="aspect-video rounded-xl overflow-hidden bg-white/5 shadow-lg ring-1 ring-white/10">
+                    <img src="" alt="" class="w-full h-full object-cover">
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <h2 id="itemName" class="text-xl font-black uppercase tracking-tight leading-tight"></h2>
+                        <p id="itemCategory" class="text-lead text-[10px] font-black uppercase tracking-widest mt-1"></p>
+                    </div>
+
+                    <div id="itemDetails" class="space-y-3 text-sm text-white/60">
+                        <!-- Dinâmico -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-lead/10 border border-lead/20 rounded-2xl p-6">
+                <h4 class="text-xs font-black uppercase tracking-widest text-lead mb-2">Dica de Transmissão</h4>
+                <p class="text-xs text-white/60 leading-relaxed">
+                    Se o player travar ou não carregar, tente trocar para outro servidor nos botões ao lado. Recomendamos conexão Wi-Fi para melhor estabilidade.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    const REI_API_CHANNELS = 'https://reidosembeds.com/api/channels';
+    const REI_API_EVENTS = 'https://reidosembeds.com/api/eventos';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    const type = urlParams.get('type');
+
+    if (!id || !type) {
+        window.location.href = '/';
+    }
+
+    async function loadContent() {
+        try {
+            const apiUrl = type === 'channel' ? REI_API_CHANNELS : REI_API_EVENTS;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+
+            if (data.success) {
+                const item = data.data.find(i => String(i.id) === String(id));
+                if (item) {
+                    renderPage(item);
+                } else {
+                    showError('Conteúdo não encontrado.');
+                }
+            } else {
+                showError('Erro ao carregar dados da API.');
+            }
+        } catch (error) {
+            console.error(error);
+            showError('Erro de conexão com o servidor.');
+        }
+    }
+
+    function renderPage(item) {
+        const title = item.title || item.name || 'Canais Ao Vivo';
+        document.getElementById('tvTitle').textContent = title;
+        document.getElementById('itemName').textContent = title;
+        document.getElementById('itemCategory').textContent = item.category || (type === 'channel' ? 'Canal de TV' : 'Evento Esportivo');
+
+        // Info Card
+        const infoCard = document.getElementById('infoCard');
+        const posterImg = document.getElementById('itemPoster').querySelector('img');
+        posterImg.src = item.poster || item.logo_url || item.preview_url || 'https://placehold.co/600x400/111/FFF?text=Sem+Capa';
+        infoCard.classList.remove('hidden');
+
+        // Detalhes extras
+        const details = document.getElementById('itemDetails');
+        let detailsHtml = '';
+        
+        if (type === 'event') {
+            if (item.start_time) detailsHtml += `<div class="flex items-center gap-2"><i class="far fa-clock"></i> Início: ${item.start_time}</div>`;
+            if (item.status) detailsHtml += `<div class="flex items-center gap-2"><i class="fas fa-info-circle"></i> Status: <span class="${item.status === 'live' ? 'text-green-500 font-bold' : ''}">${item.status === 'live' ? 'AO VIVO' : 'Em breve'}</span></div>`;
+        } else {
+            detailsHtml += `<div class="flex items-center gap-2"><i class="fas fa-tv"></i> Transmissão 24 horas disponível</div>`;
+        }
+        details.innerHTML = detailsHtml;
+
+        // Players
+        const embeds = type === 'channel' ? [{embed_url: item.embed_url, player_name: 'Player Principal'}] : item.embeds;
+        const selector = document.getElementById('playerSelector');
+        const buttonsContainer = document.getElementById('playerButtons');
+
+        if (embeds && embeds.length > 0) {
+            selector.classList.remove('hidden');
+            buttonsContainer.innerHTML = embeds.map((emb, idx) => `
+                <button class="btn-player ${idx === 0 ? 'active' : ''} px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2" 
+                        onclick="switchPlayer(this, '${emb.embed_url}')">
+                    <i class="fas fa-server"></i> ${emb.player_name || 'Player ' + (idx + 1)}
+                </button>
+            `).join('');
+
+            // Carregar primeiro player
+            switchPlayer(null, embeds[0].embed_url, true);
+        } else {
+            showError('Nenhum player disponível no momento.');
+        }
+    }
+
+    function switchPlayer(btn, url, isFirst = false) {
+        const container = document.getElementById('iframeContainer');
+        const loading = document.getElementById('loading');
+        
+        if (!isFirst) {
+            document.querySelectorAll('.btn-player').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        loading.classList.remove('hidden');
+        container.classList.add('hidden');
+        
+        container.innerHTML = `<iframe src="${url}" allowfullscreen scrolling="no" allow="autoplay; encrypted-media"></iframe>`;
+        
+        setTimeout(() => {
+            container.classList.remove('hidden');
+            loading.classList.add('hidden');
+        }, 1500);
+    }
+
+    function showError(msg) {
+        document.getElementById('loading').innerHTML = `
+            <div class="text-center px-4">
+                <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+                <p class="text-xs font-bold uppercase text-white/60">${msg}</p>
+                <a href="javascript:history.back()" class="mt-6 inline-block px-6 py-2 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-lead transition-all">Voltar</a>
+            </div>
+        `;
+    }
+
+    loadContent();
+</script>
+
+</body>
+</html>
