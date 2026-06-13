@@ -66,36 +66,123 @@ let client;
 
 async function gonzalesdados(url) {
   try {
-    const response = await axios.get(url, { timeout: 10000 });
+    console.log('\n================================');
+    console.log('🌐 ACESSANDO URL:', url);
+    console.log('================================\n');
+
+    const response = await axios.get(url, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      }
+    });
+
+    console.log('✅ STATUS:', response.status);
+    console.log('📏 HTML RECEBIDO:', response.data.length, 'caracteres');
+
     const html = response.data;
     const $ = cheerio.load(html);
-    let resultadoFinal = { dados: null, fotos: [] };
+
+    let resultadoFinal = {
+      dados: null,
+      fotos: []
+    };
+
+    console.log('🔍 Procurando imagens...');
 
     $('img').each((i, el) => {
       const src = $(el).attr('src');
-      if (src && !src.includes('data:image')) resultadoFinal.fotos.push(src);
+
+      if (src && !src.includes('data:image')) {
+        resultadoFinal.fotos.push(src);
+        console.log(`🖼️ Imagem ${i + 1}:`, src);
+      }
     });
 
-    const jsonMatch = html.match(/(?:const|let|var) (?:dadosPessoais|dados|resultado) = (\[.*?\]|\{.*?\});/s);
+    console.log(`📸 Total de imagens encontradas: ${resultadoFinal.fotos.length}`);
+
+    console.log('🔍 Procurando JSON embutido...');
+
+    const jsonMatch = html.match(
+      /(?:const|let|var) (?:dadosPessoais|dados|resultado) = (\[.*?\]|\{.*?\});/s
+    );
+
     if (jsonMatch && jsonMatch[1]) {
-      try { resultadoFinal.dados = eval(jsonMatch[1]); } catch (e) {}
+      console.log('✅ JSON encontrado');
+
+      try {
+        resultadoFinal.dados = eval(jsonMatch[1]);
+
+        console.log('📦 JSON convertido com sucesso');
+        console.log(
+          JSON.stringify(resultadoFinal.dados, null, 2)
+        );
+      } catch (e) {
+        console.log('❌ Erro ao converter JSON');
+        console.log(e);
+      }
     }
 
     if (!resultadoFinal.dados) {
+      console.log('🔍 Tentando extrair estrutura HTML...');
+
       const dadosEstruturados = {};
+
       $('section.card, section.list, div.grid').each((i, section) => {
-        let titulo = $(section).find('h3').text().trim() || "Geral";
-        if (!dadosEstruturados[titulo]) dadosEstruturados[titulo] = {};
-        $(section).find('article.field, div.item, div.grid > div').each((j, field) => {
-          const chave = $(field).find('span').first().text().trim();
-          const valor = $(field).find('strong').first().text().trim();
-          if (chave && valor) dadosEstruturados[titulo][chave] = valor;
-        });
+        let titulo =
+          $(section).find('h3').text().trim() || 'Geral';
+
+        console.log(`\n📂 Seção: ${titulo}`);
+
+        if (!dadosEstruturados[titulo]) {
+          dadosEstruturados[titulo] = {};
+        }
+
+        $(section)
+          .find('article.field, div.item, div.grid > div')
+          .each((j, field) => {
+            const chave = $(field)
+              .find('span')
+              .first()
+              .text()
+              .trim();
+
+            const valor = $(field)
+              .find('strong')
+              .first()
+              .text()
+              .trim();
+
+            if (chave && valor) {
+              dadosEstruturados[titulo][chave] = valor;
+
+              console.log(`   ${chave}: ${valor}`);
+            }
+          });
       });
-      if (Object.keys(dadosEstruturados).length > 0) resultadoFinal.dados = dadosEstruturados;
+
+      if (Object.keys(dadosEstruturados).length > 0) {
+        resultadoFinal.dados = dadosEstruturados;
+
+        console.log('✅ Dados estruturados encontrados');
+      }
     }
+
+    console.log('\n📋 RESULTADO FINAL');
+    console.log(JSON.stringify(resultadoFinal, null, 2));
+
     return resultadoFinal;
-  } catch (error) { return null; }
+  } catch (error) {
+    console.log('\n❌ ERRO EM gonzalesdados');
+    console.log(error.message);
+
+    if (error.response) {
+      console.log('STATUS:', error.response.status);
+      console.log('DATA:', error.response.data);
+    }
+
+    return null;
+  }
 }
 
 
