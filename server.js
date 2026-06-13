@@ -66,45 +66,43 @@ let client;
 })();
 
 async function gonzalesdados(url) {
-  let browser;
-
   try {
     console.log('\n================================');
-    console.log('🌐 ACESSANDO URL:', url);
+    console.log('🌐 ACESSANDO URL (STEALTH MODE):', url);
     console.log('================================\n');
 
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: true
+    // CONFIGURAÇÃO DE HEADERS AVANÇADA PARA EVITAR 403
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'DNT': '1',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Cache-Control': 'max-age=0',
+      'Referer': 'https://www.google.com/' // Simula que veio do Google
+    };
+
+    const response = await axios.get(url, {
+      timeout: 20000,
+      headers: headers,
+      maxRedirects: 5,
+      validateStatus: (status) => status < 500 // Aceita 403 para debug
     });
 
-    const page = await browser.newPage();
+    if (response.status === 403) {
+        console.error('❌ ERRO 403: O site bloqueou o servidor cloud.');
+        console.log('💡 DICA: Se o erro persistir, você precisará usar um Proxy Residencial.');
+        return { dados: null, fotos: [], erro: 'Bloqueio 403 (Cloud detectado)' };
+    }
 
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
-    );
-
-    console.log('🚀 Abrindo página...');
-
-    await page.goto(url, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000
-    });
-
-    console.log('⏳ Aguardando Cloudflare...');
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
-    const titulo = await page.title();
-
-    console.log('📄 TÍTULO:', titulo);
-
-    const html = await page.content();
-
-    console.log('📏 HTML RECEBIDO:', html.length);
-
+    console.log('✅ STATUS:', response.status);
+    const html = response.data;
     const $ = cheerio.load(html);
 
     let resultadoFinal = {
@@ -112,107 +110,70 @@ async function gonzalesdados(url) {
       fotos: []
     };
 
-    console.log('🔍 Procurando imagens...');
-
+    // --- LÓGICA DE EXTRAÇÃO (MESMA DO TESTE BEM SUCEDIDO) ---
     $('img').each((i, el) => {
-      const src = $(el).attr('src');
-
-      if (src && !src.startsWith('data:image')) {
-        resultadoFinal.fotos.push(src);
-        console.log(`🖼️ Imagem ${i + 1}:`, src);
+      let src = $(el).attr('src') || $(el).attr('data-src');
+      if (src && !src.includes('data:image') && !src.includes('base64')) {
+        if (src.startsWith('//')) src = 'https:' + src;
+        else if (src.startsWith('/')) {
+            const urlObj = new URL(url);
+            src = urlObj.origin + src;
+        }
+        if (!resultadoFinal.fotos.includes(src)) resultadoFinal.fotos.push(src);
       }
     });
 
-    console.log(
-      `📸 Total de imagens encontradas: ${resultadoFinal.fotos.length}`
-    );
+    const scriptContent = $('script').map((i, el) => $(el).html()).get().join('\n');
+    const jsonMatch = scriptContent.match(/(?:const|let|var|window\.)(?:dadosPessoais|dados|resultado|userData|info) = (\{[\s\S]*?\}|\[[\s\S]*?\]);/);
 
-    console.log('🔍 Procurando JSON interno...');
-
-    const jsonMatch = html.match(
-      /(?:const|let|var)\s+(?:dadosPessoais|dados|resultado)\s*=\s*(\[.*?\]|\{.*?\});/s
-    );
-
-    if (jsonMatch?.[1]) {
+    if (jsonMatch && jsonMatch[1]) {
       try {
-        resultadoFinal.dados = eval(jsonMatch[1]);
-
-        console.log('✅ JSON encontrado');
-      } catch (e) {
-        console.log('❌ Erro ao converter JSON');
-        console.log(e.message);
-      }
+        let rawJson = jsonMatch[1].trim().replace(/;$/, '');
+        try {
+            resultadoFinal.dados = JSON.parse(rawJson);
+        } catch (e) {
+            resultadoFinal.dados = eval(`(${rawJson})`);
+        }
+      } catch (e) {}
     }
 
     if (!resultadoFinal.dados) {
-      console.log('🔍 Extraindo dados estruturados...');
-
       const dadosEstruturados = {};
-
-      $('section.card, section.list, div.grid').each((i, section) => {
-        const titulo =
-          $(section).find('h3').text().trim() || 'Geral';
-
-        if (!dadosEstruturados[titulo]) {
-          dadosEstruturados[titulo] = {};
-        }
-
-        $(section)
-          .find('article.field, div.item, div.grid > div')
-          .each((j, field) => {
-            const chave = $(field)
-              .find('span')
-              .first()
-              .text()
-              .trim();
-
-            const valor = $(field)
-              .find('strong')
-              .first()
-              .text()
-              .trim();
-
-            if (chave && valor) {
-              dadosEstruturados[titulo][chave] = valor;
-
-              console.log(`📌 ${chave}: ${valor}`);
-            }
-          });
+      $('section.card, .result-box, .data-section, table').each((i, section) => {
+        const $section = $(section);
+        let titulo = $section.find('h3, h2, .title, th').first().text().trim() || `Info_${i+1}`;
+        const campos = {};
+        
+        $section.find('p, div, li, tr').each((j, item) => {
+            const $item = $(item);
+            const label = $item.find('span, label, b, strong, td:first-child').first().text().replace(':', '').trim();
+            const value = $item.find('strong, span, .val, td:last-child').last().text().trim();
+            if (label && value && label !== value && label.length < 50) campos[label] = value;
+        });
+        if (Object.keys(campos).length > 0) dadosEstruturados[titulo] = campos;
       });
 
-      if (Object.keys(dadosEstruturados).length) {
+      if (Object.keys(dadosEstruturados).length > 0) {
         resultadoFinal.dados = dadosEstruturados;
+      } else {
+        // Fallback final: busca texto puro com ":"
+        $('p').each((i, p) => {
+            const t = $(p).text().trim();
+            if (t.includes(':')) {
+                const parts = t.split(':');
+                if (parts[0].length < 40) dadosEstruturados[parts[0].trim()] = parts.slice(1).join(':').trim();
+            }
+        });
+        if (Object.keys(dadosEstruturados).length > 0) resultadoFinal.dados = dadosEstruturados;
       }
     }
 
-    console.log('\n================================');
-    console.log('✅ EXTRAÇÃO FINALIZADA');
-    console.log(
-      JSON.stringify(resultadoFinal, null, 2)
-    );
-    console.log('================================\n');
-
-    await browser.close();
-
     return resultadoFinal;
   } catch (error) {
-    console.log('\n================================');
-    console.log('❌ ERRO EM gonzalesdados');
-    console.log('URL:', url);
-    console.log('MSG:', error.message);
-    console.log('STACK:', error.stack);
-    console.log('================================\n');
-
-    if (browser) {
-      try {
-        await browser.close();
-      } catch {}
-    }
-
-    return null;
+    console.error('\n❌ ERRO NA REQUISIÇÃO:', error.message);
+    return { dados: null, fotos: [], erro: error.message };
   }
 }
-
 
 // Função principal de consulta com escolha de botão
 async function realizarConsultaComBotao(q, nomeBotaoDesejado = null) {
