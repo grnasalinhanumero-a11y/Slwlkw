@@ -64,45 +64,33 @@ let client;
     console.error('❌ Erro ao iniciar:', err);
   }
 })();
-
 async function gonzalesdados(url) {
+  let browser = null;
   try {
     console.log('\n================================');
-    console.log('🌐 ACESSANDO URL (STEALTH MODE):', url);
+    console.log('🌐 ACESSANDO URL (PUPPETEER):', url);
     console.log('================================\n');
 
-    // CONFIGURAÇÃO DE HEADERS AVANÇADA PARA EVITAR 403
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-      'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'DNT': '1',
-      'Connection': 'keep-alive',
-      'Upgrade-Insecure-Requests': '1',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'none',
-      'Sec-Fetch-User': '?1',
-      'Cache-Control': 'max-age=0',
-      'Referer': 'https://www.google.com/' // Simula que veio do Google
-    };
-
-    const response = await axios.get(url, {
-      timeout: 20000,
-      headers: headers,
-      maxRedirects: 5,
-      validateStatus: (status) => status < 500 // Aceita 403 para debug
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
-    if (response.status === 403) {
-        console.error('❌ ERRO 403: O site bloqueou o servidor cloud.');
-        console.log('💡 DICA: Se o erro persistir, você precisará usar um Proxy Residencial.');
-        return { dados: null, fotos: [], erro: 'Bloqueio 403 (Cloud detectado)' };
-    }
+    const page = await browser.newPage();
+    
+    // Configura User Agent realista
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
 
-    console.log('✅ STATUS:', response.status);
-    const html = response.data;
+    // Tenta acessar a URL
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    // Aguarda um pouco para garantir que scripts de proteção rodem
+    await new Promise(r => setTimeout(r, 2000));
+
+    const html = await page.content();
     const $ = cheerio.load(html);
 
     let resultadoFinal = {
@@ -110,7 +98,7 @@ async function gonzalesdados(url) {
       fotos: []
     };
 
-    // --- LÓGICA DE EXTRAÇÃO (MESMA DO TESTE BEM SUCEDIDO) ---
+    // 1. EXTRAÇÃO DE FOTOS
     $('img').each((i, el) => {
       let src = $(el).attr('src') || $(el).attr('data-src');
       if (src && !src.includes('data:image') && !src.includes('base64')) {
@@ -123,27 +111,36 @@ async function gonzalesdados(url) {
       }
     });
 
-    const scriptContent = $('script').map((i, el) => $(el).html()).get().join('\n');
-    const jsonMatch = scriptContent.match(/(?:const|let|var|window\.)(?:dadosPessoais|dados|resultado|userData|info) = (\{[\s\S]*?\}|\[[\s\S]*?\]);/);
-
-    if (jsonMatch && jsonMatch[1]) {
-      try {
-        let rawJson = jsonMatch[1].trim().replace(/;$/, '');
-        try {
-            resultadoFinal.dados = JSON.parse(rawJson);
-        } catch (e) {
-            resultadoFinal.dados = eval(`(${rawJson})`);
+    // 2. EXTRAÇÃO DE JSON (Executa direto no contexto da página se possível)
+    const pageData = await page.evaluate(() => {
+        const vars = ['dadosPessoais', 'dados', 'resultado', 'userData', 'info'];
+        for (const v of vars) {
+            if (window[v]) return window[v];
         }
-      } catch (e) {}
+        return null;
+    });
+
+    if (pageData) {
+        resultadoFinal.dados = pageData;
+        console.log('✅ JSON extraído via contexto do Navegador');
+    } else {
+        // Fallback: Busca no HTML via Cheerio
+        const scriptContent = $('script').map((i, el) => $(el).html()).get().join('\n');
+        const jsonMatch = scriptContent.match(/(?:const|let|var|window\.)(?:dadosPessoais|dados|resultado|userData|info) = (\{[\s\S]*?\}|\[[\s\S]*?\]);/);
+        if (jsonMatch && jsonMatch[1]) {
+            try {
+                resultadoFinal.dados = eval(`(${jsonMatch[1].trim().replace(/;$/, '')})`);
+            } catch (e) {}
+        }
     }
 
+    // 3. EXTRAÇÃO ESTRUTURADA (Heurística)
     if (!resultadoFinal.dados) {
       const dadosEstruturados = {};
       $('section.card, .result-box, .data-section, table').each((i, section) => {
         const $section = $(section);
         let titulo = $section.find('h3, h2, .title, th').first().text().trim() || `Info_${i+1}`;
         const campos = {};
-        
         $section.find('p, div, li, tr').each((j, item) => {
             const $item = $(item);
             const label = $item.find('span, label, b, strong, td:first-child').first().text().replace(':', '').trim();
@@ -152,28 +149,18 @@ async function gonzalesdados(url) {
         });
         if (Object.keys(campos).length > 0) dadosEstruturados[titulo] = campos;
       });
-
-      if (Object.keys(dadosEstruturados).length > 0) {
-        resultadoFinal.dados = dadosEstruturados;
-      } else {
-        // Fallback final: busca texto puro com ":"
-        $('p').each((i, p) => {
-            const t = $(p).text().trim();
-            if (t.includes(':')) {
-                const parts = t.split(':');
-                if (parts[0].length < 40) dadosEstruturados[parts[0].trim()] = parts.slice(1).join(':').trim();
-            }
-        });
-        if (Object.keys(dadosEstruturados).length > 0) resultadoFinal.dados = dadosEstruturados;
-      }
+      if (Object.keys(dadosEstruturados).length > 0) resultadoFinal.dados = dadosEstruturados;
     }
 
+    console.log('✅ Extração concluída com sucesso');
     return resultadoFinal;
   } catch (error) {
-    console.error('\n❌ ERRO NA REQUISIÇÃO:', error.message);
+    console.error('\n❌ ERRO NO PUPPETEER:', error.message);
     return { dados: null, fotos: [], erro: error.message };
+  } finally {
+    if (browser) await browser.close();
   }
-}
+          }
 
 // Função principal de consulta com escolha de botão
 async function realizarConsultaComBotao(q, nomeBotaoDesejado = null) {
