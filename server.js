@@ -98,7 +98,6 @@ async function gonzalesdados(url) {
   } catch (error) { return null; }
 }
 
-const app = express();
 
 // Função principal de consulta com escolha de botão
 async function realizarConsultaComBotao(q, nomeBotaoDesejado = null) {
