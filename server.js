@@ -71,11 +71,17 @@ async function gonzalesdados(url) {
     console.log('================================\n');
 
     const response = await axios.get(url, {
-      timeout: 10000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0'
-      }
-    });
+  timeout: 15000,
+  headers: {
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+    'Accept':
+      'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+    'Referer': 'https://google.com/',
+    'Cache-Control': 'no-cache'
+  }
+});
 
     console.log('✅ STATUS:', response.status);
     console.log('📏 HTML RECEBIDO:', response.data.length, 'caracteres');
