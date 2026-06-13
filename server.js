@@ -7,7 +7,8 @@ const cheerio = require('cheerio');
 const { NewMessage } = require("telegram/events");
 const { EditedMessage } = require("telegram/events/EditedMessage");
 const readline = require("readline");
-
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 const app = express();
 const PORT = process.env.PORT || 3000;
 // bloquear arquivos.js
@@ -64,127 +65,47 @@ let client;
   }
 })();
 
+
 async function gonzalesdados(url) {
+  let browser;
+
   try {
-    console.log('\n================================');
-    console.log('🌐 ACESSANDO URL:', url);
-    console.log('================================\n');
+    console.log('🌐 URL:', url);
 
-    const response = await axios.get(url, {
-  timeout: 15000,
-  headers: {
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-    'Accept':
-      'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-    'Referer': 'https://google.com/',
-    'Cache-Control': 'no-cache'
-  }
-});
-
-    console.log('✅ STATUS:', response.status);
-    console.log('📏 HTML RECEBIDO:', response.data.length, 'caracteres');
-
-    const html = response.data;
-    const $ = cheerio.load(html);
-
-    let resultadoFinal = {
-      dados: null,
-      fotos: []
-    };
-
-    console.log('🔍 Procurando imagens...');
-
-    $('img').each((i, el) => {
-      const src = $(el).attr('src');
-
-      if (src && !src.includes('data:image')) {
-        resultadoFinal.fotos.push(src);
-        console.log(`🖼️ Imagem ${i + 1}:`, src);
-      }
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless
     });
 
-    console.log(`📸 Total de imagens encontradas: ${resultadoFinal.fotos.length}`);
+    const page = await browser.newPage();
 
-    console.log('🔍 Procurando JSON embutido...');
-
-    const jsonMatch = html.match(
-      /(?:const|let|var) (?:dadosPessoais|dados|resultado) = (\[.*?\]|\{.*?\});/s
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
     );
 
-    if (jsonMatch && jsonMatch[1]) {
-      console.log('✅ JSON encontrado');
+    await page.goto(url, {
+      waitUntil: 'networkidle2',
+      timeout: 60000
+    });
 
+    console.log('✅ Página carregada');
+
+    const html = await page.content();
+
+    console.log('📏 HTML:', html.length);
+
+    await browser.close();
+
+    return html;
+  } catch (err) {
+    console.log('❌ ERRO:', err);
+
+    if (browser) {
       try {
-        resultadoFinal.dados = eval(jsonMatch[1]);
-
-        console.log('📦 JSON convertido com sucesso');
-        console.log(
-          JSON.stringify(resultadoFinal.dados, null, 2)
-        );
-      } catch (e) {
-        console.log('❌ Erro ao converter JSON');
-        console.log(e);
-      }
-    }
-
-    if (!resultadoFinal.dados) {
-      console.log('🔍 Tentando extrair estrutura HTML...');
-
-      const dadosEstruturados = {};
-
-      $('section.card, section.list, div.grid').each((i, section) => {
-        let titulo =
-          $(section).find('h3').text().trim() || 'Geral';
-
-        console.log(`\n📂 Seção: ${titulo}`);
-
-        if (!dadosEstruturados[titulo]) {
-          dadosEstruturados[titulo] = {};
-        }
-
-        $(section)
-          .find('article.field, div.item, div.grid > div')
-          .each((j, field) => {
-            const chave = $(field)
-              .find('span')
-              .first()
-              .text()
-              .trim();
-
-            const valor = $(field)
-              .find('strong')
-              .first()
-              .text()
-              .trim();
-
-            if (chave && valor) {
-              dadosEstruturados[titulo][chave] = valor;
-
-              console.log(`   ${chave}: ${valor}`);
-            }
-          });
-      });
-
-      if (Object.keys(dadosEstruturados).length > 0) {
-        resultadoFinal.dados = dadosEstruturados;
-
-        console.log('✅ Dados estruturados encontrados');
-      }
-    }
-
-    console.log('\n📋 RESULTADO FINAL');
-    console.log(JSON.stringify(resultadoFinal, null, 2));
-
-    return resultadoFinal;
-  } catch (error) {
-    console.log('\n❌ ERRO EM gonzalesdados');
-    console.log(error.message);
-
-    if (error.response) {
-      console.log('STATUS:', error.response.status);
-      console.log('DATA:', error.response.data);
+        await browser.close();
+      } catch {}
     }
 
     return null;
