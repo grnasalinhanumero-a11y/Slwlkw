@@ -65,18 +65,19 @@ let client;
   }
 })();
 
-
 async function gonzalesdados(url) {
   let browser;
 
   try {
-    console.log('🌐 URL:', url);
+    console.log('\n================================');
+    console.log('🌐 ACESSANDO URL:', url);
+    console.log('================================\n');
 
     browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless
+      headless: true
     });
 
     const page = await browser.newPage();
@@ -85,22 +86,122 @@ async function gonzalesdados(url) {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
     );
 
+    console.log('🚀 Abrindo página...');
+
     await page.goto(url, {
-      waitUntil: 'networkidle2',
-      timeout: 60000
+      waitUntil: 'domcontentloaded',
+      timeout: 30000
     });
 
-    console.log('✅ Página carregada');
+    console.log('⏳ Aguardando Cloudflare...');
+
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    const titulo = await page.title();
+
+    console.log('📄 TÍTULO:', titulo);
 
     const html = await page.content();
 
-    console.log('📏 HTML:', html.length);
+    console.log('📏 HTML RECEBIDO:', html.length);
+
+    const $ = cheerio.load(html);
+
+    let resultadoFinal = {
+      dados: null,
+      fotos: []
+    };
+
+    console.log('🔍 Procurando imagens...');
+
+    $('img').each((i, el) => {
+      const src = $(el).attr('src');
+
+      if (src && !src.startsWith('data:image')) {
+        resultadoFinal.fotos.push(src);
+        console.log(`🖼️ Imagem ${i + 1}:`, src);
+      }
+    });
+
+    console.log(
+      `📸 Total de imagens encontradas: ${resultadoFinal.fotos.length}`
+    );
+
+    console.log('🔍 Procurando JSON interno...');
+
+    const jsonMatch = html.match(
+      /(?:const|let|var)\s+(?:dadosPessoais|dados|resultado)\s*=\s*(\[.*?\]|\{.*?\});/s
+    );
+
+    if (jsonMatch?.[1]) {
+      try {
+        resultadoFinal.dados = eval(jsonMatch[1]);
+
+        console.log('✅ JSON encontrado');
+      } catch (e) {
+        console.log('❌ Erro ao converter JSON');
+        console.log(e.message);
+      }
+    }
+
+    if (!resultadoFinal.dados) {
+      console.log('🔍 Extraindo dados estruturados...');
+
+      const dadosEstruturados = {};
+
+      $('section.card, section.list, div.grid').each((i, section) => {
+        const titulo =
+          $(section).find('h3').text().trim() || 'Geral';
+
+        if (!dadosEstruturados[titulo]) {
+          dadosEstruturados[titulo] = {};
+        }
+
+        $(section)
+          .find('article.field, div.item, div.grid > div')
+          .each((j, field) => {
+            const chave = $(field)
+              .find('span')
+              .first()
+              .text()
+              .trim();
+
+            const valor = $(field)
+              .find('strong')
+              .first()
+              .text()
+              .trim();
+
+            if (chave && valor) {
+              dadosEstruturados[titulo][chave] = valor;
+
+              console.log(`📌 ${chave}: ${valor}`);
+            }
+          });
+      });
+
+      if (Object.keys(dadosEstruturados).length) {
+        resultadoFinal.dados = dadosEstruturados;
+      }
+    }
+
+    console.log('\n================================');
+    console.log('✅ EXTRAÇÃO FINALIZADA');
+    console.log(
+      JSON.stringify(resultadoFinal, null, 2)
+    );
+    console.log('================================\n');
 
     await browser.close();
 
-    return html;
-  } catch (err) {
-    console.log('❌ ERRO:', err);
+    return resultadoFinal;
+  } catch (error) {
+    console.log('\n================================');
+    console.log('❌ ERRO EM gonzalesdados');
+    console.log('URL:', url);
+    console.log('MSG:', error.message);
+    console.log('STACK:', error.stack);
+    console.log('================================\n');
 
     if (browser) {
       try {
