@@ -1616,15 +1616,15 @@ async function sendChat() {
   try {
     let url = '';
     if (model === 'gpt4o') {
-      url = `https://api.giftedtech.co.ke/api/ai/gpt4o?apikey=${API_KEY}&q=${encodeURIComponent(msg)}`;
+      url = `https://api.gifted.co.ke/api/ai/gpt4o?apikey=${API_KEY}&q=${encodeURIComponent(msg)}`;
     } else if (model === 'gemini') {
-      url = `https://api.giftedtech.co.ke/api/ai/gemini?apikey=${API_KEY}&q=${encodeURIComponent(msg)}`;
+      url = `https://api.gifted.co.ke/api/ai/gemini?apikey=${API_KEY}&q=${encodeURIComponent(msg)}`;
     } else if (model === 'copilot') {
       url = `https://apisnodz.com.br/api/ias/copilot?prompt=${encodeURIComponent(msg)}`;
     } else if (model === 'llama3') {
       url = `https://apisnodz.com.br/api/ias/dracarys-llama-3?prompt=${encodeURIComponent(msg)}`;
     } else {
-      url = `https://api.giftedtech.co.ke/api/ai/overchat?apikey=${API_KEY}&q=${encodeURIComponent(msg)}&model=${model}`;
+      url = `https://api.gifted.co.ke/api/ai/overchat?apikey=${API_KEY}&q=${encodeURIComponent(msg)}&model=${model}`;
     }
 
     const res = await fetch(url);
@@ -1667,7 +1667,7 @@ async function generateImage() {
   btn.style.opacity = '0.5';
   
   try {
-    let url = `https://api.giftedtech.co.ke/api/ai/${engine}?apikey=${API_KEY}&prompt=${encodeURIComponent(prompt)}`;
+    let url = `https://api.gifted.co.ke/api/ai/${engine}?apikey=${API_KEY}&prompt=${encodeURIComponent(prompt)}`;
     if (engine === 'fluximg') url += '&ratio=1:1';
     
     const res = await fetch(url);
