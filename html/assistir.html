@@ -60,10 +60,22 @@
         <div id="playerControls" class="bg-white/5 border-t border-white/5 py-4 hidden">
             <div class="container xl:max-w-7xl mx-auto px-4 flex flex-wrap gap-3 justify-center">
                 <button onclick="changePlayer(1)" id="btn-p1" class="player-btn px-6 py-2.5 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2">
-                    <i class="fas fa-play"></i> Player 1
+                    <i class="fas fa-play"></i> SuperFlix
                 </button>
                 <button onclick="changePlayer(2)" id="btn-p2" class="player-btn px-6 py-2.5 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2">
-                    <i class="fas fa-play"></i> Player 2
+                    <i class="fas fa-play"></i> WarezCDN
+                </button>
+                <button onclick="changePlayer(3)" id="btn-p3" class="player-btn px-6 py-2.5 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2">
+                    <i class="fas fa-play"></i> EmbedPlay
+                </button>
+                <button onclick="changePlayer(4)" id="btn-p4" class="player-btn px-6 py-2.5 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2">
+                    <i class="fas fa-play"></i> MGEB
+                </button>
+                <button onclick="changePlayer(5)" id="btn-p5" class="player-btn px-6 py-2.5 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2">
+                    <i class="fas fa-play"></i> MegaEmbed
+                </button>
+                <button onclick="changePlayer(6)" id="btn-p6" class="player-btn px-6 py-2.5 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-2">
+                    <i class="fas fa-play"></i> EmbedMovies
                 </button>
             </div>
         </div>
@@ -169,6 +181,15 @@ let activePlayer = 1;
 let trailerKey = '';
 let isPlayerStarted = false;
 
+const providers = [
+    { name: 'SuperFlix', baseUrl: 'https://superflixapi.monster' },
+    { name: 'WarezCDN', baseUrl: 'https://warezcdn.sbs' },
+    { name: 'EmbedPlay', baseUrl: 'https://embedplayapi.top' },
+    { name: 'MGEB', baseUrl: 'https://mgeb.site' },
+    { name: 'MegaEmbed', baseUrl: 'https://megaembed.com' },
+    { name: 'EmbedMovies', baseUrl: 'https://embedmovies.org' }
+];
+
 if (!contentId || !contentType) {
     window.location.href = '/';
 }
@@ -231,21 +252,13 @@ function changePlayer(playerNum) {
     document.getElementById(`btn-p${playerNum}`).classList.add('active');
     
     const playerFrame = document.getElementById('playerFrame');
-    let embedUrl = '';
-    
-    if (activePlayer === 1) {
-        if (contentType === 'movie') {
-            embedUrl = `https://superflixapi.monster/filme/${contentId}`;
-        } else {
-            embedUrl = `https://superflixapi.monster/serie/${contentId}/${currentSeason}/${currentEpisode}`;
-        }
-    } else {
-        if (contentType === 'movie') {
-            embedUrl = `https://warezcdn.sbs/filme/${contentId}`;
-        } else {
-            embedUrl = `https://warezcdn.sbs/serie/${contentId}/${currentSeason}/${currentEpisode}`;
-        }
-    }
+    const provider = providers[activePlayer - 1];
+    if (!provider) return;
+
+    const mediaPath = contentType === 'movie'
+        ? `filme/${contentId}`
+        : `serie/${contentId}/${currentSeason}/${currentEpisode}`;
+    const embedUrl = `${provider.baseUrl}/${mediaPath}`;
     
     playerFrame.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen scrolling="no"></iframe>`;
 }
