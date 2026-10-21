@@ -1032,11 +1032,15 @@ function scrollCategories(direction) {
     });
 }
 
-const REI_API_CHANNELS = 'https://reidosembeds.lat/api/channels';
+const REI_API_CHANNELS = '/api-proxy/rei/channels';
+const REI_EMBEDS_API_CHANNELS = '/api-proxy/reidosembeds/channels';
+const EMBEDTV_API_CHANNELS = '/api-proxy/embedtv/channels';
+const EMBEDTV_API_EPG = '/api-proxy/embedtv/epg_all';
 
 let allChannels = [];
 let activeCategory = 'all';
 let currentChannelId = null;
+let currentChannelSource = 'rei';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadChannels();
@@ -1045,20 +1049,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadChannels() {
     try {
-        const response = await fetch(REI_API_CHANNELS);
-        const data = await response.json();
-        
-        if (data && data.success && Array.isArray(data.data)) {
-            allChannels = data.data;
-        } else if (Array.isArray(data)) {
-            allChannels = data;
-        }
+        const results = await Promise.allSettled([
+            fetch(REI_API_CHANNELS).then(response => response.json()),
+            fetch(REI_EMBEDS_API_CHANNELS).then(response => response.json()),
+            fetch(EMBEDTV_API_CHANNELS).then(response => response.json()),
+            fetch(EMBEDTV_API_EPG).then(response => response.json())
+        ]);
+
+        const reiData = results[0].status === 'fulfilled' ? results[0].value : null;
+        const reiEmbedsData = results[1].status === 'fulfilled' ? results[1].value : null;
+        const embedData = results[2].status === 'fulfilled' ? results[2].value : null;
+        const epgData = results[3].status === 'fulfilled' ? results[3].value : [];
+
+        const reiChannels = reiData && Array.isArray(reiData.data)
+            ? reiData.data.map(channel => ({
+                ...channel,
+                source: 'rei',
+                embed_url: channel.embed_url || channel.embeds?.[0]?.embed_url,
+                preview_url: channel.preview_url || channel.epg?.current?.image,
+                now_playing_has_guide: Boolean(channel.epg?.current),
+                now_playing_title: channel.epg?.current?.title || '',
+                now_playing_progress: channel.epg?.current?.start_time && channel.epg?.current?.end_time
+                    ? Math.round(((Date.now() / 1000 - channel.epg.current.start_time) / (channel.epg.current.end_time - channel.epg.current.start_time)) * 100)
+                    : 0,
+                now_playing_next_programmes: channel.epg?.next ? [{
+                    title: channel.epg.next.title,
+                    start: new Date(channel.epg.next.start_time * 1000).toISOString(),
+                    end: new Date(channel.epg.next.end_time * 1000).toISOString()
+                }] : []
+            }))
+            : [];
+        const reiEmbedsChannels = reiEmbedsData && Array.isArray(reiEmbedsData.data)
+            ? reiEmbedsData.data.map(channel => ({
+                ...channel,
+                source: 'reidosembeds',
+                category: isAdultChannel(channel) ? 'Adultos' : (channel.category || 'Sem Categoria'),
+                embed_url: channel.embed_url || channel.embeds?.[0]?.embed_url
+            }))
+            : [];
+        const epgByChannel = new Map(
+            (Array.isArray(epgData) ? epgData : []).map(item => [String(item.id), item.data || []])
+        );
+        const embedChannels = embedData && Array.isArray(embedData.channels)
+            ? embedData.channels.map(channel => {
+                const categories = Array.isArray(embedData.categories) ? embedData.categories : [];
+                const categoryNames = (channel.categories || [])
+                    .map(categoryId => categories.find(category => category.id === categoryId)?.name)
+                    .filter(Boolean);
+                const category = categoryNames.filter(name => name !== 'Todos').join(' • ') || 'EmbedTV';
+                const adult = isAdultChannel({ ...channel, category });
+                return {
+                    id: channel.id,
+                    source: 'embedtv',
+                    name: channel.name,
+                    category: adult ? 'Adultos' : category,
+                    logo_url: channel.image,
+                    preview_url: channel.preview,
+                    embed_url: channel.url,
+                    ...normaliseEmbedTvGuide(epgByChannel.get(String(channel.id)) || [])
+                };
+            })
+            : [];
+
+        allChannels = [...reiChannels, ...reiEmbedsChannels, ...embedChannels];
+        if (!allChannels.length) throw new Error('Nenhuma fonte de canais respondeu');
         
         renderChannels(allChannels);
     } catch (error) {
         console.error('Erro ao carregar canais:', error);
         document.getElementById('categoriesContainer').innerHTML = '<p class="text-white/20 font-bold uppercase tracking-widest text-xs py-10">Erro ao carregar canais</p>';
     }
+}
+
+function normaliseEmbedTvGuide(programmes) {
+    if (!programmes.length) return {};
+    const sorted = programmes
+        .filter(program => program && program.start_date)
+        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+    const now = Date.now();
+    let current = sorted[0];
+    for (let i = 0; i < sorted.length; i++) {
+        const start = new Date(sorted[i].start_date).getTime();
+        const next = sorted[i + 1] ? new Date(sorted[i + 1].start_date).getTime() : start + 1800000;
+        if (now >= start && now < next) { current = sorted[i]; break; }
+        if (start <= now) current = sorted[i];
+    }
+    const currentIndex = Math.max(0, sorted.indexOf(current));
+    const start = new Date(current.start_date).getTime();
+    const nextStart = sorted[currentIndex + 1] ? new Date(sorted[currentIndex + 1].start_date).getTime() : start + 1800000;
+    const progress = Math.round(Math.max(0, Math.min(100, ((now - start) / Math.max(1, nextStart - start)) * 100)));
+    return {
+        now_playing_has_guide: true,
+        now_playing_title: current.title,
+        now_playing_progress: progress,
+        now_playing_next_programmes: sorted.slice(currentIndex + 1, currentIndex + 6).map((program, index, list) => ({
+            title: program.title,
+            start: program.start_date,
+            end: list[index + 1]?.start_date || new Date(new Date(program.start_date).getTime() + 1800000).toISOString()
+        }))
+    };
 }
 
 function buildCategoryNav(categories) {
@@ -1092,6 +1181,12 @@ function filterByCategory(catName) {
 function isAdultCategory(category) {
     const adultKeywords = ['adulto', 'xxx', 'hot', 'adult', 'porn', 'sex', '18+', 'premium adulto'];
     return adultKeywords.some(keyword => category.toLowerCase().includes(keyword));
+}
+
+function isAdultChannel(channel) {
+    const category = String(channel.category || '');
+    const name = String(channel.name || channel.title || '').toLowerCase();
+    return isAdultCategory(category) || ['sexy hot', 'playboy', 'play boy', 'xxx', 'porn'].some(keyword => name.includes(keyword));
 }
 
 function renderChannels(channels) {
@@ -1238,6 +1333,7 @@ function renderChannelCard(channel, isAdult = false) {
                 class="channel-card"
                 data-channel-name="${name.toLowerCase()}"
                 data-channel-id="${channel.id}"
+                data-channel-source="${channel.source || 'rei'}"
                 onclick="checkAdultPassword(event)"
                 style="cursor:pointer;"
             >
@@ -1268,7 +1364,7 @@ function renderChannelCard(channel, isAdult = false) {
             class="channel-card"
             data-channel-name="${name.toLowerCase()}"
             data-channel-id="${channel.id}"
-            onclick="window.location.href='tv?id=${channel.id}&type=channel'"
+            onclick="window.location.href='tv?id=${encodeURIComponent(channel.id)}&type=channel&source=${channel.source || 'rei'}'"
             style="cursor:pointer;"
         >
 
@@ -1296,6 +1392,7 @@ function renderChannelCard(channel, isAdult = false) {
 function checkAdultPassword(event) {
     event.stopPropagation();
     currentChannelId = event.currentTarget.getAttribute('data-channel-id');
+    currentChannelSource = event.currentTarget.getAttribute('data-channel-source') || 'rei';
     openPasswordModal();
 }
 
@@ -1324,7 +1421,7 @@ function submitPassword() {
     const fullPassword = pass1 + pass2 + pass3 + pass4;
     
     if (fullPassword === '0000') {
-        window.location.href = `tv?id=${currentChannelId}&type=channel`;
+        window.location.href = `tv?id=${encodeURIComponent(currentChannelId)}&type=channel&source=${currentChannelSource}`;
     } else {
         const inputs = [document.getElementById('passwordInput1'), document.getElementById('passwordInput2'), document.getElementById('passwordInput3'), document.getElementById('passwordInput4')];
         inputs.forEach(input => {

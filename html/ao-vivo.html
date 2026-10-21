@@ -470,7 +470,9 @@ function scrollCarousel(id, direction) {
     });
 }
 
-const REI_API_EVENTS = 'https://reidosembeds.lat/api/eventos';
+const REI_API_EVENTS = '/api-proxy/rei/sports';
+const REI_EMBEDS_API_EVENTS = '/api-proxy/reidosembeds/events';
+const EMBEDTV_API_EVENTS = '/api-proxy/embedtv/events';
 
 const CAT_ICONS = {
     'Futebol': 'fas fa-futbol', 'Basquete': 'fas fa-basketball-ball', 'Tênis': 'fas fa-table-tennis',
@@ -487,14 +489,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadAllEvents() {
     try {
-        const response = await fetch(REI_API_EVENTS);
-        const data = await response.json();
-        allEvents = data.data || data;
+        const [reiResult, reiEmbedsResult, embedResult] = await Promise.allSettled([
+            fetch(REI_API_EVENTS).then(response => response.json()),
+            fetch(REI_EMBEDS_API_EVENTS).then(response => response.json()),
+            fetch(EMBEDTV_API_EVENTS).then(response => response.json())
+        ]);
+        const reiData = reiResult.status === 'fulfilled' ? reiResult.value : [];
+        const reiEmbedsData = reiEmbedsResult.status === 'fulfilled' ? reiEmbedsResult.value : [];
+        const embedData = embedResult.status === 'fulfilled' ? embedResult.value : [];
+        const reiEvents = (reiData.data || reiData).map(event => ({ ...event, source: 'rei' }));
+        const reiEmbedsEvents = (reiEmbedsData.data || reiEmbedsData).map(event => ({ ...event, source: 'reidosembeds' }));
+        const embedEvents = (Array.isArray(embedData) ? embedData : []).map(normaliseEmbedTvEvent);
+        allEvents = [...reiEvents, ...reiEmbedsEvents, ...embedEvents];
         activeDay = getSaoPauloDate();
         buildDayTabs();
         buildCategoryChips();
         applyFilters();
     } catch (e) { console.error(e); }
+}
+
+function normaliseEmbedTvEvent(event) {
+    const start = new Date(event.time_start);
+    const end = new Date(event.time_end);
+    const now = Date.now();
+    return {
+        id: event.id,
+        source: 'embedtv',
+        title: event.title || 'Evento',
+        category: event.league?.name || 'Outros',
+        competition: event.league?.name || 'Evento ao vivo',
+        start_time: event.time_start.replace('T', ' '),
+        status: now >= start.getTime() && now < end.getTime() ? 'live' : (now < start.getTime() ? 'upcoming' : 'finished'),
+        poster: event.league?.image,
+        time1: event.teams?.home?.image,
+        time2: event.teams?.away?.image,
+        visual_model: 'versus'
+    };
 }
 
 function buildDayTabs() {
@@ -593,7 +623,7 @@ function applyFilters() {
         }
 
         return `
-            <div class="event-card ${isLive ? 'live' : ''}" onclick="window.location.href='tv?id=${e.id}&type=event'">
+            <div class="event-card ${isLive ? 'live' : ''}" onclick="window.location.href='tv?id=${encodeURIComponent(e.id)}&type=event&source=${e.source || 'rei'}'">
                 <div class="flex justify-between mb-4">
                     <span class="event-badge ${isLive ? '' : 'upcoming'}">${isLive ? '● Ao Vivo' : time}</span>
                     <span class="text-[10px] font-bold text-white/20 uppercase">${e.category}</span>

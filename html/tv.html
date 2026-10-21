@@ -576,10 +576,25 @@
     ============================================================ */
 
     const REI_API_CHANNELS =
-        'https://reidosembeds.lat/api/channels';
+        '/api-proxy/rei/channels';
+
+    const REI_EMBEDS_API_CHANNELS =
+        '/api-proxy/reidosembeds/channels';
 
     const REI_API_EVENTS =
-        'https://reidosembeds.lat/api/eventos';
+        '/api-proxy/rei/sports';
+
+    const REI_EMBEDS_API_EVENTS =
+        '/api-proxy/reidosembeds/events';
+
+    const EMBEDTV_API_CHANNELS =
+        '/api-proxy/embedtv/channels';
+
+    const EMBEDTV_API_EVENTS =
+        '/api-proxy/embedtv/events';
+
+    const EMBEDTV_API_EPG =
+        '/api-proxy/embedtv/epg_all';
 
 
 
@@ -595,6 +610,9 @@
 
     const type =
         urlParams.get('type');
+
+    const source =
+        urlParams.get('source') || 'rei';
 
 
 
@@ -898,84 +916,91 @@
     ============================================================ */
 
     async function loadContent() {
-
         try {
+            const apiUrl = type === 'channel'
+                ? (source === 'embedtv' ? EMBEDTV_API_CHANNELS : source === 'reidosembeds' ? REI_EMBEDS_API_CHANNELS : REI_API_CHANNELS)
+                : (source === 'embedtv' ? EMBEDTV_API_EVENTS : source === 'reidosembeds' ? REI_EMBEDS_API_EVENTS : REI_API_EVENTS);
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            let item = null;
 
-            const apiUrl =
-                type === 'channel'
-                    ? REI_API_CHANNELS
-                    : REI_API_EVENTS;
-
-
-            const response =
-                await fetch(apiUrl);
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `HTTP ${response.status}`
-                );
-
-            }
-
-
-            const data =
-                await response.json();
-
-
-
-            if (
-                data &&
-                data.success &&
-                Array.isArray(data.data)
-            ) {
-
-                const item =
-                    data.data.find(
-                        i =>
-                            String(i.id) ===
-                            String(id)
-                    );
-
-
-                if (item) {
-
-                    renderPage(item);
-
-                } else {
-
-                    showError(
-                        'Conteúdo não encontrado.'
-                    );
-
+            if (source === 'embedtv' && type === 'channel') {
+                const channel = (data.channels || []).find(i => String(i.id) === String(id));
+                if (channel) {
+                    const categories = data.categories || [];
+                    const names = (channel.categories || [])
+                        .map(categoryId => categories.find(category => category.id === categoryId)?.name)
+                        .filter(Boolean);
+                    item = {
+                        ...channel,
+                        name: channel.name,
+                        category: names.filter(name => name !== 'Todos').join(' • '),
+                        logo_url: channel.image,
+                        preview_url: channel.preview,
+                        embed_url: channel.url
+                    };
+                    const epgResponse = await fetch(EMBEDTV_API_EPG);
+                    if (epgResponse.ok) {
+                        const epg = await epgResponse.json();
+                        const guide = (Array.isArray(epg) ? epg : []).find(entry => String(entry.id) === String(id));
+                        if (guide) applyEmbedTvGuide(item, guide.data || []);
+                    }
                 }
-
+            } else if (source === 'embedtv' && type === 'event') {
+                const raw = (Array.isArray(data) ? data : []).find(i => String(i.id) === String(id));
+                if (raw) item = normaliseEmbedTvEvent(raw);
             } else {
-
-                showError(
-                    'Erro ao carregar dados da API.'
-                );
-
+                const entries = Array.isArray(data) ? data : data.data;
+                const raw = Array.isArray(entries) ? entries.find(i => String(i.id) === String(id)) : null;
+                item = raw && type === 'channel'
+                    ? { ...raw, embed_url: raw.embed_url || raw.embeds?.[0]?.embed_url }
+                    : raw;
             }
 
+            if (item) renderPage(item);
+            else showError('Conteúdo não encontrado.');
         } catch (error) {
-
-            console.error(
-                'Erro:',
-                error
-            );
-
-
-            showError(
-                'Erro de conexão com o servidor.'
-            );
-
+            console.error('Erro:', error);
+            showError('Erro de conexão com o servidor.');
         }
-
     }
 
+    function normaliseEmbedTvEvent(event) {
+        const start = new Date(event.time_start);
+        const end = new Date(event.time_end);
+        const now = Date.now();
+        return {
+            ...event,
+            category: event.league?.name || 'Evento',
+            competition: event.league?.name || 'Evento ao vivo',
+            start_time: event.time_start,
+            status: now >= start.getTime() && now < end.getTime() ? 'live' : (now < start.getTime() ? 'upcoming' : 'finished'),
+            poster: event.league?.image,
+            time1: event.teams?.home?.image,
+            time2: event.teams?.away?.image,
+            visual_model: 'versus',
+            embeds: (event.players || []).filter(Boolean).map((url, index) => ({ embed_url: url, player_name: `Player ${index + 1}` }))
+        };
+    }
 
+    function applyEmbedTvGuide(channel, programmes) {
+        if (!programmes.length) return;
+        const now = Date.now();
+        let currentIndex = 0;
+        for (let i = 0; i < programmes.length; i++) {
+            if (new Date(programmes[i].start_date).getTime() <= now) currentIndex = i;
+        }
+        const current = programmes[currentIndex];
+        channel.now_playing_has_guide = true;
+        channel.now_playing_title = current.title;
+        channel.now_playing_progress = 0;
+        channel.now_playing_next_programmes = programmes.slice(currentIndex + 1, currentIndex + 6).map((program, index, list) => ({
+            title: program.title,
+            start: program.start_date,
+            end: list[index + 1]?.start_date
+        }));
+    }
 
     /* ============================================================
        RENDERIZAR PÁGINA
@@ -1155,15 +1180,11 @@
 
         const embeds =
             type === 'channel'
-                ? [
-                    {
-                        embed_url:
-                            item.embed_url,
-
-                        player_name:
-                            'Player Principal'
-                    }
-                ]
+                ? (Array.isArray(item.embeds) && item.embeds.length
+                    ? item.embeds
+                    : item.embed_url
+                        ? [{ embed_url: item.embed_url, player_name: 'Player Principal' }]
+                        : [])
                 : item.embeds;
 
 
