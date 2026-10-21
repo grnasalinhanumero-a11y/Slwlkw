@@ -182,12 +182,13 @@ let trailerKey = '';
 let isPlayerStarted = false;
 
 const providers = [
-    { name: 'SuperFlix', baseUrl: 'https://superflixapi.monster' },
-    { name: 'WarezCDN', baseUrl: 'https://warezcdn.sbs' },
-    { name: 'EmbedPlay', baseUrl: 'https://embedplayapi.top' },
-    { name: 'MGEB', baseUrl: 'https://mgeb.site' },
-    { name: 'MegaEmbed', baseUrl: 'https://megaembed.com' },
-    { name: 'EmbedMovies', baseUrl: 'https://embedmovies.org' }
+    { name: 'SuperFlix', buildUrl: (id, season, episode) => season ? `https://superflixapi.monster/serie/${id}/${season}/${episode}` : `https://superflixapi.monster/filme/${id}` },
+    { name: 'WarezCDN', buildUrl: (id, season, episode) => season ? `https://warezcdn.sbs/serie/${id}/${season}/${episode}` : `https://warezcdn.sbs/filme/${id}` },
+    { name: 'EmbedPlay', buildUrl: (id, season, episode) => season ? `https://embedplayapi.top/embed/${id}/${season}/${episode}` : `https://embedplayapi.top/embed/${id}` },
+    { name: 'MGEB', buildUrl: (id, season, episode) => season ? `https://mgeb.site/embed/${id}/${season}/${episode}` : `https://mgeb.site/embed/${id}` },
+    { name: 'MegaEmbed', buildUrl: (id, season, episode) => season ? `https://megaembed.com/embed/${id}/${season}/${episode}` : `https://megaembed.com/embed/${id}` },
+    // O domínio da página é embedmovies.org, mas a documentação informa myembed.biz como host do player.
+    { name: 'EmbedMovies', buildUrl: (id, season, episode) => season ? `https://myembed.biz/serie/${id}/${season}/${episode}` : `https://myembed.biz/filme/${id}` }
 ];
 
 if (!contentId || !contentType) {
@@ -255,12 +256,13 @@ function changePlayer(playerNum) {
     const provider = providers[activePlayer - 1];
     if (!provider) return;
 
-    const mediaPath = contentType === 'movie'
-        ? `filme/${contentId}`
-        : `serie/${contentId}/${currentSeason}/${currentEpisode}`;
-    const embedUrl = `${provider.baseUrl}/${mediaPath}`;
+    const embedUrl = provider.buildUrl(
+        contentId,
+        contentType === 'movie' ? null : currentSeason,
+        contentType === 'movie' ? null : currentEpisode
+    );
     
-    playerFrame.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen scrolling="no"></iframe>`;
+    playerFrame.innerHTML = `<iframe src="${embedUrl}" class="w-full h-full" frameborder="0" scrolling="no" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
 }
 
 function setupSeries(data) {
