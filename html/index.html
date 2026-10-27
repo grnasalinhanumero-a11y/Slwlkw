@@ -1201,6 +1201,7 @@ const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 const MULTICANAIS_EVENTS_API = 'https://multicanais.red/api/real-games.php';
 const MULTICANAIS_BASE_URL = 'https://multicanais.red';
 const REI_API_EVENTS = '/api-proxy/reidosembeds/events';
+const REI_API_CHANNELS = '/api-proxy/rei/channels';
 
 // API fornecida para consultar os players de cada evento.
 // A URL do evento é adicionada dinamicamente conforme o feed de eventos.
@@ -1218,6 +1219,7 @@ let currentEventPlayer = null;
 document.addEventListener('DOMContentLoaded', () => { 
     loadHeroContent(); 
     loadAllSections();
+    loadChannels();
     setupSearchModal();
     setupMobileNav();
 });
@@ -1719,10 +1721,10 @@ function renderChannels(channels) {
         return;
     }
     container.innerHTML = channels.map(channel => {
-        const img = channel.poster || channel.logo || '';
+        const img = channel.poster || channel.logo || channel.logo_url || channel.image || '';
         const name = channel.title || channel.name || 'Canal';
         return `
-            <div class="channel-card group flex flex-col items-center !w-[140px] !min-w-[140px] cursor-pointer" onclick="window.location.href='tv?id=${encodeURIComponent(channel.id)}&type=channel&source=reidosembeds'">
+            <div class="channel-card group flex flex-col items-center !w-[140px] !min-w-[140px] cursor-pointer" onclick="window.location.href='tv?id=${encodeURIComponent(channel.id)}&type=channel&source=rei'">
                 <div class="channel-logo-wrapper mb-4 shadow-2xl">
                     <img src="${img}" class="w-full h-full object-contain" alt="${name}" onerror="this.src='https://placehold.co/150x150/111/FFF?text=${encodeURIComponent(name)}'">
                 </div>
