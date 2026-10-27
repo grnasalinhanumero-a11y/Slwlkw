@@ -324,6 +324,115 @@
                 max-height: 380px;
             }
         }
+    
+        /* =========================================================
+           CAPA E DETALHES ESPORTIVOS
+        ========================================================= */
+        .event-cover {
+            position: relative;
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 15%, rgba(52,140,254,.35), transparent 55%), linear-gradient(135deg, #101827, #050505 70%);
+        }
+        .event-cover::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 25%, rgba(0,0,0,.72)); pointer-events:none; }
+        .event-cover-teams { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:18px; width:100%; padding:18px; }
+        .event-cover-team { display:flex; flex-direction:column; align-items:center; gap:8px; min-width:92px; text-align:center; }
+        .event-cover-team img { width:72px; height:72px; object-fit:contain; filter:drop-shadow(0 8px 16px rgba(0,0,0,.55)); }
+        .event-cover-team span { font-size:10px; font-weight:900; text-transform:uppercase; line-height:1.15; }
+        .event-cover-vs { font-size:12px; font-weight:900; color:#348cfe; }
+        .event-cover-meta { position:absolute; z-index:2; left:12px; right:12px; bottom:10px; display:flex; justify-content:space-between; gap:10px; font-size:8px; font-weight:900; text-transform:uppercase; color:rgba(255,255,255,.72); }
+        .sports-details { background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.08); border-radius:16px; overflow:hidden; }
+        .sports-scoreboard { padding:18px; background:linear-gradient(135deg,rgba(52,140,254,.14),rgba(255,255,255,.025)); border-bottom:1px solid rgba(255,255,255,.07); }
+        .sports-score-status { text-align:center; color:#348cfe; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:.12em; margin-bottom:12px; }
+        .sports-score-teams { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; }
+        .sports-score-team { display:flex; align-items:center; gap:8px; min-width:0; font-size:11px; font-weight:900; text-transform:uppercase; }
+        .sports-score-team.away { justify-content:flex-end; text-align:right; }
+        .sports-score-team img { width:34px; height:34px; object-fit:contain; flex:0 0 34px; }
+        .sports-score { font-size:23px; font-weight:900; white-space:nowrap; }
+        .sports-score-sub { text-align:center; color:rgba(255,255,255,.35); font-size:8px; font-weight:800; margin-top:8px; }
+        .sports-tabs { display:flex; gap:6px; overflow-x:auto; padding:10px; border-bottom:1px solid rgba(255,255,255,.07); }
+        .sports-tab { flex:0 0 auto; border:1px solid rgba(255,255,255,.1); border-radius:8px; background:rgba(255,255,255,.04); color:rgba(255,255,255,.55); padding:8px 10px; font-size:9px; font-weight:900; text-transform:uppercase; cursor:pointer; }
+        .sports-tab.active { background:#348cfe; border-color:#348cfe; color:#fff; }
+        .sports-panel { padding:14px; }
+        .sports-list { display:flex; flex-direction:column; gap:8px; }
+        .sports-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px; border-radius:10px; background:rgba(255,255,255,.04); font-size:10px; }
+        .sports-row small { color:rgba(255,255,255,.4); font-size:8px; font-weight:800; }
+        .sports-empty { padding:20px 8px; text-align:center; color:rgba(255,255,255,.35); font-size:10px; font-weight:800; text-transform:uppercase; }
+        .sports-section-title { margin-bottom:10px; color:#348cfe; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.1em; }
+        .sports-lineup-team { margin-bottom:16px; }
+        .sports-lineup-heading { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:10px; font-weight:900; text-transform:uppercase; }
+        .sports-lineup-heading img { width:24px; height:24px; object-fit:contain; }
+        .sports-members { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+        .sports-member { display:flex; align-items:center; gap:7px; padding:7px; border-radius:8px; background:rgba(255,255,255,.04); min-width:0; }
+        .sports-member img { width:24px; height:24px; object-fit:cover; border-radius:50%; background:#111; }
+        .sports-member-copy { min-width:0; }
+        .sports-member-name { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:9px; font-weight:800; }
+        .sports-member-meta { display:block; color:rgba(255,255,255,.38); font-size:7px; font-weight:700; }
+        .sports-stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .sports-stat-card { padding:12px; border-radius:10px; background:rgba(255,255,255,.04); text-align:center; }
+        .sports-stat-value { display:block; font-size:18px; font-weight:900; color:#348cfe; }
+        .sports-stat-label { display:block; margin-top:4px; color:rgba(255,255,255,.45); font-size:8px; font-weight:800; text-transform:uppercase; }
+        @media(max-width:500px){ .sports-score-team{font-size:9px}.sports-members{grid-template-columns:1fr}.event-cover-team img{width:60px;height:60px} }
+
+    
+        .sports-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .sports-info-item { padding:10px; border-radius:9px; background:rgba(255,255,255,.04); }
+        .sports-info-label { display:block; color:rgba(255,255,255,.38); font-size:8px; font-weight:800; text-transform:uppercase; margin-bottom:4px; }
+        .sports-info-value { display:block; color:#fff; font-size:10px; font-weight:800; line-height:1.3; }
+        .sports-summary-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+        .sports-summary-head strong { font-size:11px; text-transform:uppercase; }
+        .sports-timeline { position:relative; display:flex; flex-direction:column; gap:8px; }
+        .sports-timeline::before { content:''; position:absolute; left:17px; top:6px; bottom:6px; width:1px; background:rgba(52,140,254,.35); }
+        .sports-timeline-item { position:relative; display:grid; grid-template-columns:35px 1fr; gap:8px; align-items:start; }
+        .sports-timeline-time { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; width:35px; min-height:28px; border-radius:8px; background:#101827; color:#348cfe; font-size:8px; font-weight:900; }
+        .sports-timeline-card { padding:9px 10px; border-radius:9px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07); }
+        .sports-timeline-title { display:block; font-size:10px; font-weight:900; }
+        .sports-timeline-meta { display:block; margin-top:3px; color:rgba(255,255,255,.45); font-size:8px; font-weight:700; }
+        @media(max-width:500px){ .sports-info-grid{grid-template-columns:1fr}.sports-timeline-title{font-size:9px} }
+
+    
+        .sports-complete-stats { display:flex; flex-direction:column; gap:7px; }
+        .sports-complete-stat { display:grid; grid-template-columns:1fr 64px 1fr; align-items:center; gap:8px; padding:9px 10px; border-radius:9px; background:rgba(255,255,255,.045); }
+        .sports-complete-stat .home-value { text-align:right; color:#62dffb; font-size:10px; font-weight:900; }
+        .sports-complete-stat .away-value { color:#bd9cff; font-size:10px; font-weight:900; }
+        .sports-complete-stat .label { text-align:center; color:rgba(255,255,255,.55); font-size:8px; font-weight:800; text-transform:uppercase; line-height:1.15; }
+        .sports-timeline-card-rich { display:flex; align-items:center; gap:9px; }
+        .sports-timeline-avatar { width:34px; height:34px; border-radius:50%; object-fit:cover; background:#18202b; border:1px solid rgba(255,255,255,.18); flex:0 0 34px; }
+        .sports-timeline-team-logo { width:21px; height:21px; object-fit:contain; margin-left:auto; flex:0 0 21px; }
+        .sports-timeline-item.shot .sports-timeline-card { border-color:rgba(52,140,254,.18); }
+        .sports-timeline-item.goal .sports-timeline-card { border-color:rgba(68,220,116,.42); background:rgba(68,220,116,.08); }
+        .sports-timeline-item.card .sports-timeline-card { border-color:rgba(255,209,75,.3); }
+        .sports-timeline-empty-photo { display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.35); font-size:13px; }
+
+    
+        .sports-modern-dashboard { display:flex; flex-direction:column; gap:14px; }
+        .sports-modern-hero { padding:15px; border:1px solid rgba(255,255,255,.09); border-radius:14px; background:linear-gradient(135deg,rgba(52,140,254,.13),rgba(124,58,237,.10) 55%,rgba(255,255,255,.025)); }
+        .sports-modern-hero-title { color:#fff; font-size:11px; font-weight:950; text-transform:uppercase; letter-spacing:.08em; }
+        .sports-modern-hero-sub { margin-top:4px; color:rgba(255,255,255,.42); font-size:8px; font-weight:750; }
+        .sports-modern-score { display:flex; align-items:center; justify-content:center; gap:14px; margin-top:13px; font-size:26px; font-weight:950; }
+        .sports-modern-score .home { color:#62dffb; } .sports-modern-score .away { color:#bd9cff; }
+        .sports-modern-score .divider { color:rgba(255,255,255,.25); font-size:15px; }
+        .sports-modern-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+        .sports-modern-card { padding:12px 9px; border-radius:11px; background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.07); text-align:center; }
+        .sports-modern-card strong { display:block; font-size:17px; font-weight:950; color:#fff; }
+        .sports-modern-card span { display:block; margin-top:4px; color:rgba(255,255,255,.42); font-size:7px; font-weight:850; text-transform:uppercase; letter-spacing:.06em; }
+        .sports-modern-legend { display:flex; justify-content:space-between; color:rgba(255,255,255,.42); font-size:8px; font-weight:850; text-transform:uppercase; }
+        .sports-modern-legend b:first-child { color:#62dffb; } .sports-modern-legend b:last-child { color:#bd9cff; }
+        .sports-modern-bars { display:flex; flex-direction:column; gap:13px; }
+        .sports-modern-stat { display:flex; flex-direction:column; gap:6px; }
+        .sports-modern-stat-head { display:grid; grid-template-columns:42px 1fr 42px; align-items:center; gap:8px; }
+        .sports-modern-stat-head strong { font-size:11px; font-weight:950; color:#62dffb; }
+        .sports-modern-stat-head strong:last-child { color:#bd9cff; text-align:right; }
+        .sports-modern-stat-head span { color:rgba(255,255,255,.62); text-align:center; font-size:8px; font-weight:850; text-transform:uppercase; }
+        .sports-modern-track { display:flex; height:7px; overflow:hidden; border-radius:99px; background:rgba(255,255,255,.08); gap:2px; }
+        .sports-modern-track i { display:block; height:100%; min-width:3px; border-radius:99px; transition:width .35s ease; }
+        .sports-modern-track i:first-child { background:linear-gradient(90deg,#2bc8ef,#62dffb); } .sports-modern-track i:last-child { background:linear-gradient(90deg,#8e62ef,#bd9cff); }
+        .sports-modern-note { padding:10px 11px; border-radius:10px; background:rgba(52,140,254,.07); color:rgba(255,255,255,.46); font-size:8px; line-height:1.45; }
+        @media(max-width:500px){ .sports-modern-score{font-size:22px}.sports-modern-cards{grid-template-columns:repeat(3,1fr)}.sports-modern-stat-head{grid-template-columns:34px 1fr 34px} }
+
     </style>
 </head>
 
@@ -500,6 +609,13 @@
 
 
 
+
+            <section id="sportsDetails" class="sports-details hidden">
+                <div id="sportsScoreboard" class="sports-scoreboard"></div>
+                <div id="sportsTabs" class="sports-tabs"></div>
+                <div id="sportsPanel" class="sports-panel"></div>
+            </section>
+
             <!-- =================================================
                  GUIA DE PROGRAMAÇÃO
             ================================================== -->
@@ -595,6 +711,19 @@
 
     const EMBEDTV_API_EPG =
         '/api-proxy/embedtv/epg_all';
+
+    const MULTICANAIS_EVENTS_API =
+        'https://multicanais.red/api/real-games.php';
+
+    const MULTICANAIS_BASE_URL =
+        'https://multicanais.red';
+
+    const ASSISTA_API =
+        '/api/assista';
+    const SCORES365_GAME_API = 'https://webws.365scores.com/web/game/?appTypeId=5&langId=31&timezoneName=America%2FSao_Paulo&userCountryId=21&showOdds=false&gameId=';
+    const SCORES365_STANDINGS_API = 'https://webws.365scores.com/web/standings/?appTypeId=5&langId=31&timezoneName=America%2FSao_Paulo&userCountryId=21&live=false&withSeasonsFilter=true&competitions=';
+    const SCORES365_BRACKETS_API = 'https://webws.365scores.com/web/brackets/?appTypeId=5&langId=31&timezoneName=America%2FSao_Paulo&userCountryId=21&live=false&competitions=';
+    const SCORES365_STATS_API = 'https://webws.365scores.com/web/stats/?appTypeId=5&langId=31&timezoneName=America%2FSao_Paulo&competitors=&withSeasons=true&competitions=';
 
 
 
@@ -917,7 +1046,9 @@
 
     async function loadContent() {
         try {
-            const apiUrl = type === 'channel'
+            const apiUrl = source === 'multicanais'
+                ? MULTICANAIS_EVENTS_API
+                : type === 'channel'
                 ? (source === 'embedtv' ? EMBEDTV_API_CHANNELS : source === 'reidosembeds' ? REI_EMBEDS_API_CHANNELS : REI_API_CHANNELS)
                 : (source === 'embedtv' ? EMBEDTV_API_EVENTS : source === 'reidosembeds' ? REI_EMBEDS_API_EVENTS : REI_API_EVENTS);
             const response = await fetch(apiUrl);
@@ -925,7 +1056,55 @@
             const data = await response.json();
             let item = null;
 
-            if (source === 'embedtv' && type === 'channel') {
+            if (source === 'multicanais' && type === 'event') {
+                const games = Array.isArray(data.jogos) ? data.jogos : [];
+                const raw = games.find(i => String(i.id) === String(id));
+                if (raw) {
+                    item = normaliseMulticanaisEvent(raw);
+                    const eventUrl = `${MULTICANAIS_BASE_URL}/assistir/${encodeURIComponent(raw.slug)}`;
+                    try {
+                        const playersResponse = await fetch(`${ASSISTA_API}?url=${encodeURIComponent(eventUrl)}`);
+                        if (!playersResponse.ok) throw new Error(`HTTP ${playersResponse.status}`);
+                        const playersData = await playersResponse.json();
+                        item.poster = playersData.imagem || item.poster;
+                        item.time1 = playersData.time1 || item.time1;
+                        item.time2 = playersData.time2 || item.time2;
+                        item.embeds = Array.isArray(playersData.players)
+                            ? playersData.players.filter(player => player && player.embed).map((player, index) => ({
+                                embed_url: player.embed,
+                                player_name: player.nome || `Player ${index + 1}`
+                            }))
+                            : [];
+                    } catch (directError) {
+                        console.warn('API direta indisponível; tentando API antiga de embeds.', directError);
+                        const legacyResponse = await fetch(REI_EMBEDS_API_EVENTS);
+                        if (!legacyResponse.ok) throw directError;
+                        const legacyData = await legacyResponse.json();
+                        const legacyEntries = Array.isArray(legacyData) ? legacyData : legacyData.data;
+                        const legacyEvent = Array.isArray(legacyEntries)
+                            ? legacyEntries.find(entry => String(entry.id) === String(id) || String(entry.slug) === String(raw.slug))
+                            : null;
+                        if (legacyEvent) {
+                            item = { ...item, ...legacyEvent };
+                            item.embeds = Array.isArray(legacyEvent.embeds)
+                                ? legacyEvent.embeds
+                                : Array.isArray(legacyEvent.players)
+                                    ? legacyEvent.players.filter(Boolean).map((embed, index) => ({
+                                        embed_url: typeof embed === 'string' ? embed : embed.embed_url || embed.embed,
+                                        player_name: embed.player_name || embed.nome || `Player ${index + 1}`
+                                    }))
+                                    : [];
+                        }
+                    }
+                    if (raw.api_game_id) {
+                        try {
+                            item.sportsData = await fetchMulticanaisSportsData(raw);
+                        } catch (sportsError) {
+                            console.warn('Dados esportivos indisponíveis:', sportsError);
+                        }
+                    }
+                }
+            } else if (source === 'embedtv' && type === 'channel') {
                 const channel = (data.channels || []).find(i => String(i.id) === String(id));
                 if (channel) {
                     const categories = data.categories || [];
@@ -964,6 +1143,196 @@
             console.error('Erro:', error);
             showError('Erro de conexão com o servidor.');
         }
+    }
+
+    function normaliseMulticanaisEvent(game) {
+        const home = game.homeCompetitor || {};
+        const away = game.awayCompetitor || {};
+        const logo = id => id ? `https://imagecache.365scores.com/image/upload/f_png,w_34,h_34,c_limit,q_auto:eco,dpr_2,d_Competitors:default.png/v1/Competitors/${encodeURIComponent(id)}` : '';
+        const start = `${game.data || ''} ${game.horario_inicio || '00:00'}`.trim();
+        const end = `${game.data || ''} ${game.horario_fim || ''}`.trim();
+        const now = new Date();
+        const startDate = new Date(start.replace(' ', 'T') + '-03:00');
+        const endDate = new Date(end.replace(' ', 'T') + '-03:00');
+        return {
+            ...game,
+            title: game.titulo || game.nome_evento || 'Evento ao vivo',
+            category: game.categoria || game.tipo_evento || game.campeonato || 'Esporte',
+            competition: game.campeonato || 'Esporte',
+            start_time: start,
+            status: startDate <= now && (!game.horario_fim || now < endDate) ? 'live' : 'upcoming',
+            poster: game.imagem || game.poster || '',
+            time1: logo(home.id),
+            time2: logo(away.id),
+            embeds: []
+        };
+    }
+
+
+    const TEAM_LOGO_365 = 'https://imagecache.365scores.com/image/upload/f_png,w_34,h_34,c_limit,q_auto:eco,dpr_2,d_Competitors:default.png/v1/Competitors/';
+    const ATHLETE_IMAGE_365 = 'https://imagecache.365scores.com/image/upload/f_png,w_34,h_34,c_limit,q_auto:eco,dpr_2,d_Athletes:default.png,r_max,c_thumb,g_face,z_0.65/v1/Athletes/';
+    function sportsEscape(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' }[char]));
+    }
+    function sportsTeamLogo(id) { return id ? TEAM_LOGO_365 + encodeURIComponent(id) : ''; }
+    function sportsAthleteImage(id) { return id ? ATHLETE_IMAGE_365 + encodeURIComponent(id) : ''; }
+    async function fetchOptionalSports(url) {
+        try { const response = await fetch(url, { cache:'no-store' }); if (!response.ok) return null; return await response.json(); }
+        catch (_) { return null; }
+    }
+    async function fetchMulticanaisSportsData(raw) {
+        const gameResponse = await fetch(SCORES365_GAME_API + encodeURIComponent(raw.api_game_id), { cache:'no-store' });
+        if (!gameResponse.ok) throw new Error(`365Scores game HTTP ${gameResponse.status}`);
+        const gamePayload = await gameResponse.json();
+        const game = gamePayload.game || gamePayload;
+        const competitionId = game.competitionId || raw.api_competition_id || '';
+        const [standings, brackets, stats] = competitionId ? await Promise.all([
+            fetchOptionalSports(SCORES365_STANDINGS_API + encodeURIComponent(competitionId)),
+            fetchOptionalSports(SCORES365_BRACKETS_API + encodeURIComponent(competitionId)),
+            fetchOptionalSports(SCORES365_STATS_API + encodeURIComponent(competitionId))
+        ]) : [null, null, null];
+        return { game, standings, brackets, stats };
+    }
+    function sportsMemberMap(game) {
+        const map = new Map();
+        (Array.isArray(game?.members) ? game.members : []).forEach(member => {
+            if (member?.id != null) map.set(String(member.id), member);
+            if (member?.athleteId != null) map.set(String(member.athleteId), member);
+        });
+        return map;
+    }
+    function sportsMemberName(member) { return member?.name || member?.shortName || 'Jogador'; }
+    function sportsStatus(game) { return game?.statusText || game?.shortStatusText || 'Agendado'; }
+    function sportsTeamName(team) { return team?.name || team?.shortName || 'Time'; }
+    function sportsTime(game) {
+        if (game?.gameTimeDisplay) return game.gameTimeDisplay;
+        if (game?.actualPlayTime?.actualTime?.name) return game.actualPlayTime.actualTime.name;
+        return game?.startTime ? new Date(game.startTime).toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'short' }) : '';
+    }
+    function renderEventCover(item, game) {
+        const home = game?.homeCompetitor || { id:item.homeCompetitor?.id, name:item.homeCompetitor?.name };
+        const away = game?.awayCompetitor || { id:item.awayCompetitor?.id, name:item.awayCompetitor?.name };
+        const competition = game?.competitionDisplayName || item.competition || 'Evento ao vivo';
+        return `<div class="event-cover"><div class="event-cover-teams">
+            <div class="event-cover-team"><img src="${sportsEscape(sportsTeamLogo(home.id))}" alt="${sportsEscape(sportsTeamName(home))}"><span>${sportsEscape(sportsTeamName(home))}</span></div>
+            <span class="event-cover-vs">VS</span>
+            <div class="event-cover-team"><img src="${sportsEscape(sportsTeamLogo(away.id))}" alt="${sportsEscape(sportsTeamName(away))}"><span>${sportsEscape(sportsTeamName(away))}</span></div>
+        </div><div class="event-cover-meta"><span>${sportsEscape(competition)}</span><span>${sportsEscape(sportsStatus(game))}</span></div></div>`;
+    }
+    function renderSportsScoreboard(item, game) {
+        const home = game?.homeCompetitor || item.homeCompetitor || {};
+        const away = game?.awayCompetitor || item.awayCompetitor || {};
+        const homeScore = home.score ?? '-'; const awayScore = away.score ?? '-';
+        const score = game?.statusGroup ? `${homeScore} × ${awayScore}` : '—';
+        return `<div class="sports-score-status">${sportsEscape(sportsStatus(game))}</div><div class="sports-score-teams">
+            <div class="sports-score-team"><img src="${sportsEscape(sportsTeamLogo(home.id))}" alt=""><span>${sportsEscape(sportsTeamName(home))}</span></div>
+            <div class="sports-score">${sportsEscape(score)}</div>
+            <div class="sports-score-team away"><span>${sportsEscape(sportsTeamName(away))}</span><img src="${sportsEscape(sportsTeamLogo(away.id))}" alt=""></div>
+        </div><div class="sports-score-sub">${sportsEscape(game?.stageName || '')}${sportsTime(game) ? ` • ${sportsEscape(sportsTime(game))}` : ''}</div>`;
+    }
+    function renderSportsEvents(game) {
+        const events = Array.isArray(game?.events) ? game.events : [];
+        const members = sportsMemberMap(game); const home = game?.homeCompetitor || {}; const away = game?.awayCompetitor || {};
+        if (!events.length) return '<div class="sports-empty">Nenhum evento registrado</div>';
+        return `<div class="sports-section-title">Eventos da partida</div><div class="sports-list">${events.map(event => {
+            const team = String(event.competitorId) === String(home.id) ? home : away;
+            const player = members.get(String(event.playerId));
+            const extra = Array.isArray(event.extraPlayers) ? event.extraPlayers.map(id => sportsMemberName(members.get(String(id)))).filter(Boolean).join(' • ') : '';
+            const label = event.eventType?.name || 'Evento';
+            return `<div class="sports-row"><span>${sportsEscape(label)}${player ? ` • ${sportsEscape(sportsMemberName(player))}` : ''}${extra ? ` <small>(${sportsEscape(extra)})</small>` : ''}</span><small>${sportsEscape(event.gameTimeDisplay || '')} • ${sportsEscape(sportsTeamName(team))}</small></div>`;
+        }).join('')}</div>`;
+    }
+    function renderSportsLineups(game) {
+        const teams = [game?.homeCompetitor, game?.awayCompetitor].filter(Boolean); const members = sportsMemberMap(game);
+        const html = teams.map(team => {
+            const lineup = team.lineups || {}; const list = Array.isArray(lineup.members) ? lineup.members : [];
+            const starters = list.filter(member => Number(member.status) === 1); const bench = list.filter(member => Number(member.status) !== 1);
+            const renderMembers = values => values.map(member => {
+                const full = members.get(String(member.id)) || member; const image = sportsAthleteImage(full.athleteId || full.id);
+                return `<div class="sports-member">${image ? `<img src="${sportsEscape(image)}" alt="">` : ''}<span class="sports-member-copy"><span class="sports-member-name">${sportsEscape(sportsMemberName(full))}</span><span class="sports-member-meta">${sportsEscape(member.position?.name || member.formation?.name || '')}${member.jerseyNumber ? ` • #${sportsEscape(member.jerseyNumber)}` : ''}</span></span></div>`;
+            }).join('');
+            return `<div class="sports-lineup-team"><div class="sports-lineup-heading"><img src="${sportsEscape(sportsTeamLogo(team.id))}" alt=""><span>${sportsEscape(sportsTeamName(team))} • ${sportsEscape(lineup.formation || 'Formação não informada')}</span></div><small style="display:block;color:rgba(255,255,255,.4);margin:5px 0 7px;font-size:8px;font-weight:800;text-transform:uppercase">Titulares</small><div class="sports-members">${renderMembers(starters) || '<div class="sports-empty">Indisponível</div>'}</div><small style="display:block;color:rgba(255,255,255,.4);margin:12px 0 7px;font-size:8px;font-weight:800;text-transform:uppercase">Banco</small><div class="sports-members">${renderMembers(bench) || '<div class="sports-empty">Indisponível</div>'}</div></div>`;
+        }).join('');
+        return html || '<div class="sports-empty">Escalações indisponíveis</div>';
+    }
+    function sportsNumericValue(value) {
+        const match=String(value??'').replace(',','.').match(/-?\d+(?:\.\d+)?/);
+        return match ? Number(match[0]) : null;
+    }
+    function renderSportsStats(game) {
+        const home=game?.homeCompetitor||{}; const away=game?.awayCompetitor||{};
+        const shots=Array.isArray(game?.chartEvents?.events)?game.chartEvents.events:[];
+        const teams=[home,away]; const aggregated=teams.map(team=>{ const map=new Map(); const members=Array.isArray(team?.lineups?.members)?team.lineups.members:[]; members.forEach(member=>(member.stats||[]).forEach(stat=>{ const label=String(stat.name||stat.shortName||'').trim(); const value=sportsNumericValue(stat.value); if(!label||value===null||/minutos|nota|ranking/i.test(label)) return; map.set(label,(map.get(label)||0)+value); })); return map; });
+        const preferred=['Total de chutes','Gols','Assistências','Passes completos','Passes decisivos','Passes longos completos','Ações com a bola','Faltas cometidas','Faltas sofridas','Defesas do goleiro','Impedimentos','Posse de bola perdida','Desarmes','Interceptações','Cortes','Duelos ganhos','Cabeceios ganhos'];
+        const common=new Set([...aggregated[0].keys(),...aggregated[1].keys()]);
+        const labels=[...preferred.filter(label=>common.has(label)),...([...common].filter(label=>!preferred.includes(label)).sort((a,b)=>a.localeCompare(b,'pt-BR')))].slice(0,28);
+        const metrics=[['Gols',home.score??0,away.score??0],['Finalizações',shots.filter(item=>Number(item.competitorNum)===1).length,shots.filter(item=>Number(item.competitorNum)===2).length],['xG',shots.filter(item=>Number(item.competitorNum)===1).reduce((sum,item)=>sum+(Number(item.xg)||0),0).toFixed(2),shots.filter(item=>Number(item.competitorNum)===2).reduce((sum,item)=>sum+(Number(item.xg)||0),0).toFixed(2)]];
+        const metricHtml=metrics.map(row=>`<div class="sports-stat-card"><span class="sports-stat-value">${sportsEscape(row[1])} × ${sportsEscape(row[2])}</span><span class="sports-stat-label">${sportsEscape(row[0])}</span></div>`).join('');
+        const rows=labels.map(label=>`<div class="sports-complete-stat"><span class="home-value">${sportsEscape(aggregated[0].get(label)??0)}</span><span class="label">${sportsEscape(label)}</span><span class="away-value">${sportsEscape(aggregated[1].get(label)??0)}</span></div>`).join('');
+        return `<div class="sports-section-title">Resumo estatístico</div><div class="sports-stat-grid">${metricHtml}</div><div class="sports-section-title" style="margin-top:16px">Estatísticas completas</div>${rows?`<div class="sports-complete-stats">${rows}</div>`:'<div class="sports-empty">Estatísticas detalhadas indisponíveis</div>'}`;
+    }
+    function renderSportsStandings(payload) {
+        const table = payload?.standings?.[0]; const rows = Array.isArray(table?.rows) ? table.rows.slice(0, 20) : [];
+        if (!rows.length) return '<div class="sports-empty">Classificação não disponível para esta competição</div>';
+        return `<div class="sports-section-title">${sportsEscape(table.displayName || 'Classificação')}</div><div class="sports-list">${rows.map((row,index) => `<div class="sports-row"><span>${index+1}. ${sportsEscape(row.competitor?.name || row.team?.name || row.name || 'Time')}</span><strong>${sportsEscape(row.points ?? row.score ?? '')}</strong></div>`).join('')}</div>`;
+    }
+    function renderSportsBrackets(payload) {
+        const brackets = Array.isArray(payload?.brackets) ? payload.brackets : [];
+        const stages = brackets.flatMap(bracket => Array.isArray(bracket.stages) ? bracket.stages : []);
+        if (!stages.length) return '<div class="sports-empty">Mata-mata não disponível</div>';
+        return `<div class="sports-section-title">Mata-mata</div><div class="sports-list">${stages.map(stage => `<div class="sports-row"><span>${sportsEscape(stage.name || 'Fase')}</span><small>${Array.isArray(stage.groups) ? stage.groups.length : 0} grupos</small></div>`).join('')}</div>`;
+    }
+
+    function renderSportsSummary(game) {
+        const home=game?.homeCompetitor||{}; const away=game?.awayCompetitor||{}; const shots=Array.isArray(game?.chartEvents?.events)?game.chartEvents.events:[]; const events=Array.isArray(game?.events)?game.events:[];
+        const teams=[home,away]; const aggregated=teams.map(team=>{ const map=new Map(); (team?.lineups?.members||[]).forEach(member=>(member.stats||[]).forEach(stat=>{ const label=String(stat.name||stat.shortName||'').trim(); const value=sportsNumericValue(stat.value); if(!label||value===null||/minutos|nota|ranking/i.test(label)) return; map.set(label,(map.get(label)||0)+value); })); return map; });
+        const shotVals=[shots.filter(item=>Number(item.competitorNum)===1).length,shots.filter(item=>Number(item.competitorNum)===2).length];
+        const xgVals=[shots.filter(item=>Number(item.competitorNum)===1).reduce((sum,item)=>sum+(Number(item.xg)||0),0),shots.filter(item=>Number(item.competitorNum)===2).reduce((sum,item)=>sum+(Number(item.xg)||0),0)];
+        const cardVals=[events.filter(item=>String(item.competitorId)===String(home.id)&&/cartão/i.test(item.eventType?.name||'')).length,events.filter(item=>String(item.competitorId)===String(away.id)&&/cartão/i.test(item.eventType?.name||'')).length];
+        const get=(label, fallback=[0,0])=>[aggregated[0].get(label)??fallback[0],aggregated[1].get(label)??fallback[1]];
+        const rows=[['Finalizações',shotVals],['Gols',[home.score??0,away.score??0]],['Gols esperados (xG)',xgVals.map(v=>Number(v.toFixed(2)))],['Passes completos',get('Passes completos')],['Passes decisivos',get('Passes decisivos')],['Ações com a bola',get('Ações com a bola')],['Faltas cometidas',get('Faltas cometidas')],['Cartões',cardVals]];
+        const maxFor=row=>Math.max(Number(row[0])||0,Number(row[1])||0,1);
+        const rowHtml=rows.map(row=>{const max=maxFor(row[1]);return `<div class="sports-modern-stat"><div class="sports-modern-stat-head"><strong>${sportsEscape(row[1][0])}</strong><span>${sportsEscape(row[0])}</span><strong>${sportsEscape(row[1][1])}</strong></div><div class="sports-modern-track"><i style="width:${(Number(row[1][0])/max)*100}%"></i><i style="width:${(Number(row[1][1])/max)*100}%"></i></div></div>`}).join('');
+        return `<div class="sports-modern-dashboard"><div class="sports-modern-hero"><div class="sports-modern-hero-title">Estatísticas da partida</div><div class="sports-modern-hero-sub">${sportsEscape(game?.competitionDisplayName||'')} • ${sportsEscape(sportsStatus(game))}</div><div class="sports-modern-score"><span class="home">${sportsEscape(home.score??'-')}</span><span class="divider">×</span><span class="away">${sportsEscape(away.score??'-')}</span></div></div><div class="sports-modern-legend"><b>${sportsEscape(sportsTeamName(home))}</b><b>${sportsEscape(sportsTeamName(away))}</b></div><div class="sports-modern-cards"><div class="sports-modern-card"><strong>${events.length}</strong><span>Eventos</span></div><div class="sports-modern-card"><strong>${shots.length}</strong><span>Chutes no mapa</span></div><div class="sports-modern-card"><strong>${sportsEscape(game?.gameTime?`${game.gameTime}'`:sportsStatus(game))}</strong><span>Tempo/status</span></div></div><div class="sports-modern-bars">${rowHtml}</div><div class="sports-modern-note">As barras comparam os números do mandante e do visitante. A aba “Detalhes” traz os indicadores individuais completos dos jogadores.</div></div>`;
+    }
+    function sportsEventType(event) {
+        const raw=String(event?.eventType?.name||'Evento').toLowerCase();
+        if (raw.includes('gol')) return 'Gol';
+        if (raw.includes('cartão amarelo')) return 'Cartão amarelo';
+        if (raw.includes('cartão vermelho')) return 'Cartão vermelho';
+        if (raw.includes('substitut')) return 'Substituição';
+        if (raw.includes('pênalti')) return 'Pênalti';
+        return event?.eventType?.name || 'Evento';
+    }
+    function renderSportsTimeline(game) {
+        const events=Array.isArray(game?.events)?game.events:[]; const shots=Array.isArray(game?.chartEvents?.events)?game.chartEvents.events:[];
+        const members=sportsMemberMap(game); const home=game?.homeCompetitor||{}; const away=game?.awayCompetitor||{}; const items=[];
+        events.forEach(event=>{ const team=String(event.competitorId)===String(home.id)?home:away; const player=members.get(String(event.playerId)); const extra=(event.extraPlayers||[]).map(id=>sportsMemberName(members.get(String(id)))).filter(Boolean); const kind=sportsEventType(event); items.push({minute:Number(event.gameTime)||0,time:event.gameTimeDisplay||'',title:kind,meta:[player&&sportsMemberName(player),extra.length?`Envolvidos: ${extra.join(', ')}`:'',sportsTeamName(team)].filter(Boolean).join(' • '),player,team,kind:kind.toLowerCase().includes('gol')?'goal':kind.toLowerCase().includes('cartão')?'card':'event'}); });
+        shots.forEach(shot=>{ const team=Number(shot.competitorNum)===1?home:away; const player=members.get(String(shot.playerId)); const outcome=shot.outcome?.name||'Finalização'; items.push({minute:Number(String(shot.time||'').match(/\d+/)?.[0])||0,time:shot.time||'',title:`Finalização: ${outcome}`,meta:[player&&sportsMemberName(player),sportsTeamName(team),shot.xg?`xG ${shot.xg}`:'',shot.bodyPart||''].filter(Boolean).join(' • '),player,team,kind:'shot'}); });
+        items.sort((a,b)=>a.minute-b.minute);
+        if(!items.length) return '<div class="sports-empty">Linha do tempo indisponível para esta partida</div>';
+        return `<div class="sports-section-title">Linha do tempo completa</div><div class="sports-timeline">${items.map(item=>{ const img=item.player?sportsAthleteImage(item.player.athleteId||item.player.id):''; const logo=sportsTeamLogo(item.team?.id); return `<div class="sports-timeline-item ${sportsEscape(item.kind)}"><span class="sports-timeline-time">${sportsEscape(item.time||`${item.minute}'`)}</span><div class="sports-timeline-card"><div class="sports-timeline-card-rich">${img?`<img class="sports-timeline-avatar" src="${sportsEscape(img)}" alt="${sportsEscape(sportsMemberName(item.player))}">`:'<span class="sports-timeline-avatar sports-timeline-empty-photo"><i class="fas fa-bolt"></i></span>'}<span style="min-width:0;flex:1"><span class="sports-timeline-title">${sportsEscape(item.title)}</span><span class="sports-timeline-meta">${sportsEscape(item.meta)}</span></span>${logo?`<img class="sports-timeline-team-logo" src="${sportsEscape(logo)}" alt="">`:''}</div></div></div>`;}).join('')}</div>`;
+    }
+    function renderSportsEventInfo(game) {
+        const venue=game?.venue||{}; const officials=Array.isArray(game?.officials)?game.officials:[]; const networks=Array.isArray(game?.tvNetworks)?game.tvNetworks:[];
+        const date=game?.startTime ? new Date(game.startTime).toLocaleString('pt-BR',{dateStyle:'full',timeStyle:'short'}) : '--';
+        const info=[['Competição',game?.competitionDisplayName||'--'],['Data e hora',date],['Estádio',venue.name||'--'],['Capacidade',venue.capacity?Number(venue.capacity).toLocaleString('pt-BR'):'--'],['Arbitragem',officials.map(item=>item.name).filter(Boolean).join(', ')||'--'],['Transmissão',networks.map(item=>item.name).filter(Boolean).join(' • ')||'--'],['Rodada/Fase',game?.stageName||'--'],['Status',sportsStatus(game)],['Tempo de bola rolando',game?.actualPlayTime?.actualTime?.name||'--'],['Tempo total',game?.actualPlayTime?.totalTime?.name||'--']];
+        return `<div class="sports-section-title">Informações do evento</div><div class="sports-info-grid">${info.map(row=>`<div class="sports-info-item"><span class="sports-info-label">${sportsEscape(row[0])}</span><span class="sports-info-value">${sportsEscape(row[1])}</span></div>`).join('')}</div>`;
+    }
+
+    function renderSportsDetails(item) {
+        const data = item?.sportsData; const box = document.getElementById('sportsDetails');
+        if (!box || !data?.game) return;
+        const game = data.game; const scoreboard = document.getElementById('sportsScoreboard'); const tabs = document.getElementById('sportsTabs'); const panel = document.getElementById('sportsPanel');
+        if (scoreboard) scoreboard.innerHTML = renderSportsScoreboard(item, game);
+        const sections = [
+            ['summary','Resumo',renderSportsSummary(game)], ['events','Eventos',renderSportsEvents(game)], ['timeline','Linha do tempo',renderSportsTimeline(game)], ['info','Info. do evento',renderSportsEventInfo(game)], ['lineups','Escalações',renderSportsLineups(game)], ['stats','Detalhes',renderSportsStats(game)], ['standings','Classificação',renderSportsStandings(data.standings)], ['brackets','Mata-mata',renderSportsBrackets(data.brackets)]
+        ].filter(section => !/não disponível|indisponíveis|nenhum evento/i.test(section[2]) || ['summary','timeline','info','stats'].includes(section[0]));
+        if (!sections.length) return;
+        tabs.innerHTML = sections.map((section,index) => `<button type="button" class="sports-tab ${index===0?'active':''}" data-sports-tab="${section[0]}">${section[1]}</button>`).join('');
+        panel.innerHTML = sections.map((section,index) => `<div data-sports-panel="${section[0]}" style="${index===0?'':'display:none'}">${section[2]}</div>`).join('');
+        tabs.querySelectorAll('[data-sports-tab]').forEach(button => button.addEventListener('click', () => { tabs.querySelectorAll('.sports-tab').forEach(item=>item.classList.remove('active')); button.classList.add('active'); panel.querySelectorAll('[data-sports-panel]').forEach(item=>item.style.display=item.dataset.sportsPanel===button.dataset.sportsTab?'block':'none'); }));
+        box.classList.remove('hidden');
     }
 
     function normaliseEmbedTvEvent(event) {
@@ -1057,20 +1426,19 @@
                 .querySelector('img');
 
 
-        posterImg.src =
-            item.poster ||
-            item.logo_url ||
-            item.preview_url ||
-            'https://placehold.co/600x400/111/FFF?text=Sem+Capa';
-
-
-        posterImg.alt =
-            title;
+        const posterBox = document.getElementById('itemPoster');
+        if (type === 'event' && item.sportsData?.game) {
+            posterBox.innerHTML = renderEventCover(item, item.sportsData.game);
+        } else {
+            posterBox.innerHTML = `<img src="${escapeHTML(item.poster || item.logo_url || item.preview_url || 'https://placehold.co/600x400/111/FFF?text=Sem+Capa')}" alt="${escapeHTML(title)}" class="w-full h-full object-cover">`;
+        }
 
 
         infoCard.classList.remove(
             'hidden'
         );
+
+        if (type === 'event') renderSportsDetails(item);
 
 
 
@@ -1227,13 +1595,8 @@
                                         ? 'active'
                                         : ''
                                 } px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
-
-                                onclick="switchPlayer(
-                                    this,
-                                    ${JSON.stringify(
-                                        emb.embed_url
-                                    )}
-                                )"
+                                type="button"
+                                data-player-url="${escapeHTML(emb.embed_url)}"
                             >
 
                                 <i class="fas fa-server"></i>
@@ -1248,6 +1611,17 @@
                         `
                     )
                     .join('');
+
+            buttonsContainer
+                .querySelectorAll('.btn-player')
+                .forEach(button => {
+                    button.addEventListener('click', () => {
+                        switchPlayer(
+                            button,
+                            button.dataset.playerUrl
+                        );
+                    });
+                });
 
 
             const firstEmbed =

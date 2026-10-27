@@ -690,6 +690,83 @@ footer{
     justify-content: center;
 }
 
+.event-player-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, .88);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+}
+
+.event-player-modal.active { display: flex; }
+
+.event-player-content {
+    width: min(1100px, 100%);
+    max-height: 94vh;
+    overflow: auto;
+    background: #080808;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    box-shadow: 0 25px 90px rgba(0,0,0,.8);
+}
+
+.event-player-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.event-player-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.event-player-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.event-player-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px 20px 20px;
+}
+
+.event-player-option {
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    padding: 9px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.event-player-option.active,
+.event-player-option:hover {
+    background: #348cfe;
+    border-color: #348cfe;
+}
+
+.event-player-status {
+    padding: 24px;
+    color: rgba(255,255,255,.65);
+    font-size: 12px;
+    text-align: center;
+}
+
 .search-result-title {
     font-weight: 800;
     font-size: 14px;
@@ -974,6 +1051,22 @@ footer{
     </div>
 </div>
 
+<!-- Modal de Players dos eventos ao vivo -->
+<div id="eventPlayerModal" class="event-player-modal" onclick="closeEventPlayerOnBackdrop(event)">
+    <div class="event-player-content" role="dialog" aria-modal="true" aria-labelledby="eventPlayerTitle">
+        <div class="event-player-header">
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-widest text-lead">Transmissão ao vivo</p>
+                <h2 id="eventPlayerTitle" class="text-lg md:text-2xl font-black">Carregando evento...</h2>
+            </div>
+            <button class="search-modal-close" onclick="closeEventPlayer()" aria-label="Fechar player"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="eventPlayerStatus" class="event-player-status">Consultando players...</div>
+        <div id="eventPlayerFrame" class="event-player-frame" style="display:none;"></div>
+        <div id="eventPlayerOptions" class="event-player-options"></div>
+    </div>
+</div>
+
 <main class="flex-1" id="inicio">
     <section id="heroSlider" class="relative w-full min-h-screen overflow-hidden bg-black pt-24 lg:pt-32">
         <div id="heroContainer"></div>
@@ -1105,8 +1198,13 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_BASE = 'https://image.tmdb.org/t/p/w1280';
 
-const REI_API_CHANNELS = '/api-proxy/reidosembeds/channels';
+const MULTICANAIS_EVENTS_API = 'https://multicanais.red/api/real-games.php';
+const MULTICANAIS_BASE_URL = 'https://multicanais.red';
 const REI_API_EVENTS = '/api-proxy/reidosembeds/events';
+
+// API fornecida para consultar os players de cada evento.
+// A URL do evento é adicionada dinamicamente conforme o feed de eventos.
+const ASSISTA_API_DIRECT = '/api/assista';
 
 const GENRE_MAP = { 28: 'Ação', 12: 'Aventura', 16: 'Animação', 35: 'Comédia', 80: 'Crime', 99: 'Documentário', 18: 'Drama', 10751: 'Família', 14: 'Fantasia', 36: 'História', 27: 'Terror', 10402: 'Música', 9648: 'Mistério', 10749: 'Romance', 878: 'Ficção científica', 10770: 'Cinema TV', 53: 'Thriller', 10752: 'Guerra', 37: 'Faroeste', 10759: 'Ação & Aventura', 10762: 'Kids', 10763: 'Notícias', 10764: 'Reality', 10765: 'Sci-Fi & Fantasy', 10766: 'Soap', 10767: 'Talk', 10768: 'War & Politics' };
 
@@ -1114,6 +1212,8 @@ let heroItems = [];
 let currentHeroIndex = 0;
 let heroInterval = null;
 let searchTimeout = null;
+let liveEventStore = new Map();
+let currentEventPlayer = null;
 
 document.addEventListener('DOMContentLoaded', () => { 
     loadHeroContent(); 
@@ -1282,29 +1382,97 @@ async function loadAllSections() {
     fetch(`${TMDB_BASE_URL}/movie/now_playing?api_key=${TMDB_API_KEY}&language=pt-BR`).then(r => r.json()).then(data => renderCarousel('launchCarousel', data.results.map(i => ({...i, media_type: 'movie'}))));
     fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=16&language=pt-BR&sort_by=popularity.desc`).then(r => r.json()).then(data => renderCarousel('liveCarousel', data.results.map(i => ({...i, media_type: 'movie'}))));
     loadLiveEvents();
-    loadChannels();
 }
 
 async function loadLiveEvents() {
     try {
-        const response = await fetch(REI_API_EVENTS);
-        const data = await response.json();
+        const results = await Promise.allSettled([
+            fetch(REI_API_EVENTS).then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`))),
+            fetch(MULTICANAIS_EVENTS_API).then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+        ]);
         const today = getSaoPauloDate();
-        if (data && data.success && Array.isArray(data.data)) {
-            const filtered = data.data.filter(e => e.start_time && e.start_time.startsWith(today));
-            filtered.sort((a, b) => (b.status === 'live' ? 1 : 0) - (a.status === 'live' ? 1 : 0));
-            renderLiveEvents(filtered);
-        } else if (data && Array.isArray(data)) {
-            const filtered = data.filter(e => e.start_time && e.start_time.startsWith(today));
-            filtered.sort((a, b) => (b.status === 'live' ? 1 : 0) - (a.status === 'live' ? 1 : 0));
-            renderLiveEvents(filtered);
-        } else {
-            renderLiveEvents([]);
-        }
+        const legacyData = results[0].status === 'fulfilled' ? results[0].value : null;
+        const multicanaisData = results[1].status === 'fulfilled' ? results[1].value : null;
+        const legacySource = legacyData && Array.isArray(legacyData.data) ? legacyData.data : (Array.isArray(legacyData) ? legacyData : []);
+        const multicanaisSource = multicanaisData && Array.isArray(multicanaisData.jogos) ? multicanaisData.jogos : [];
+        const normalized = [
+            ...legacySource.map(normalizeLegacyEvent).filter(Boolean),
+            ...multicanaisSource.map(normalizeMulticanaisGame).filter(Boolean)
+        ];
+        const unique = [...new Map(normalized.map(event => [event.id || `${event.title}-${event.start_time}`, event])).values()];
+        const filtered = unique.filter(e => e.start_time && e.start_time.startsWith(today));
+        filtered.sort((a, b) => Number(b.source === 'multicanais') - Number(a.source === 'multicanais') || Number(isEventLive(b)) - Number(isEventLive(a)) || String(a.start_time).localeCompare(String(b.start_time)));
+        renderLiveEvents(filtered);
     } catch (error) {
         console.error('Erro ao carregar eventos:', error);
         renderLiveEvents([]);
     }
+}
+
+function normalizeLegacyEvent(event) {
+    if (!event) return null;
+    return {
+        ...event,
+        source: 'reidosembeds',
+        id: event.id || event.slug,
+        title: event.title || event.titulo || event.name || 'Evento ao vivo',
+        competition: event.competition || event.campeonato || 'Esporte',
+        category: event.category || event.categoria || 'Esporte',
+        start_time: event.start_time || event.start || '',
+        end_time: event.end_time || event.end || '',
+        time1: event.time1 || event.home_logo || event.home?.image || '',
+        time2: event.time2 || event.away_logo || event.away?.image || '',
+        channel_name: event.channel_name || event.channel || ''
+    };
+}
+
+function normalizeMulticanaisGame(game) {
+    if (!game || !game.slug) return null;
+    const home = game.homeCompetitor || {};
+    const away = game.awayCompetitor || {};
+    const logo = id => id ? `https://imagecache.365scores.com/image/upload/f_png,w_34,h_34,c_limit,q_auto:eco,dpr_2,d_Competitors:default.png/v1/Competitors/${encodeURIComponent(id)}` : '';
+    return {
+        ...game,
+        source: 'multicanais',
+        id: game.id || game.slug,
+        title: game.titulo || game.nome_evento || 'Evento ao vivo',
+        competition: game.campeonato || game.categoria || 'Esporte',
+        category: game.categoria || game.tipo_evento || game.campeonato || 'Esporte',
+        start_time: `${game.data || ''} ${game.horario_inicio || '00:00'}`.trim(),
+        end_time: buildMulticanaisEndTime(game),
+        time1: logo(home.id),
+        time2: logo(away.id),
+        time1_name: home.name || '',
+        time2_name: away.name || '',
+        channel_name: Array.isArray(game.transmissao) ? game.transmissao.join(' • ') : '',
+        url: `${MULTICANAIS_BASE_URL}/assistir/${encodeURIComponent(game.slug)}`,
+        poster: game.imagem || game.poster || ''
+    };
+}
+
+function buildMulticanaisEndTime(game) {
+    if (!game.data || !game.horario_fim) return '';
+    const crossesMidnight = game.horario_inicio && game.horario_fim < game.horario_inicio;
+    if (!crossesMidnight) return `${game.data} ${game.horario_fim}`;
+    const nextDay = new Date(`${game.data}T${game.horario_fim}:00-03:00`);
+    nextDay.setDate(nextDay.getDate() + 1);
+    return nextDay.toISOString();
+}
+
+function parseEventDate(value) {
+    if (!value) return null;
+    const normalized = String(value).trim().replace(' ', 'T');
+    const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(normalized);
+    const date = new Date(hasTimezone ? normalized : `${normalized}-03:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function isEventLive(event) {
+    if (String(event.status || '').toLowerCase() === 'live') return true;
+    const start = parseEventDate(event.start_time);
+    const end = parseEventDate(event.end_time || event.finish_time || event.end_at);
+    const now = new Date();
+    return Boolean(start && now >= start && (!end || now <= end));
 }
 
 async function loadChannels() {
@@ -1408,12 +1576,16 @@ function renderCarousel(id, items) {
 function renderLiveEvents(events) {
     const container = document.getElementById('liveEventsCarousel');
     if (!container) return;
+    liveEventStore = new Map();
     if (!events || events.length === 0) {
         container.innerHTML = '<p class="text-white/20 font-bold uppercase tracking-widest text-xs py-10">Nenhum evento para hoje</p>';
         return;
     }
     container.innerHTML = events.map(event => {
-        const time = event.start_time ? event.start_time.split(' ')[1].substring(0, 5) : '--:--';
+        const eventKey = String(event.id || event.slug || `${event.start_time}-${event.title || ''}`);
+        liveEventStore.set(eventKey, event);
+        const time = event.start_time ? event.start_time.replace('T', ' ').split(' ')[1].substring(0, 5) : '--:--';
+        const live = isEventLive(event);
         
         // Categorias que devem mostrar pôster em vez de confronto "VS"
         const individualSports = ['Fórmula 1', 'F1', 'Natação', 'UFC', 'MMA', 'Boxe', 'MotoGP', 'Surf', 'Atletismo'];
@@ -1438,9 +1610,9 @@ function renderLiveEvents(events) {
         }
 
         return `
-            <div class="event-card group cursor-pointer" onclick="window.location.href='tv?id=${encodeURIComponent(event.id)}&type=event&source=reidosembeds'">
+            <div class="event-card group cursor-pointer" onclick="window.location.href='tv?id=${encodeURIComponent(event.id)}&type=event&source=${encodeURIComponent(event.source || 'multicanais')}'">
                 <div class="flex justify-between items-start mb-4">
-                    <span class="event-badge">${event.status === 'live' ? 'Ao Vivo' : time}</span>
+                    <span class="event-badge">${live ? 'Ao Vivo' : time}</span>
                     <span class="text-[10px] font-black text-white/30 uppercase italic">${event.category || 'Esporte'}</span>
                 </div>
                 ${content}
@@ -1452,6 +1624,91 @@ function renderLiveEvents(events) {
             </div>
         `;
     }).join('');
+}
+
+function getEventSourceUrl(event) {
+    return event.url || event.link || event.href || event.page_url || event.source_url || event.watch_url || event.assista_url || '';
+}
+
+async function fetchAssistaPlayers(sourceUrl) {
+    const endpoint = `${ASSISTA_API_DIRECT}?url=${encodeURIComponent(sourceUrl)}`;
+    const response = await fetch(endpoint);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+}
+
+async function openEventPlayers(eventKey) {
+    const event = liveEventStore.get(eventKey);
+    if (!event) return;
+
+    const modal = document.getElementById('eventPlayerModal');
+    const title = document.getElementById('eventPlayerTitle');
+    const status = document.getElementById('eventPlayerStatus');
+    const frame = document.getElementById('eventPlayerFrame');
+    const options = document.getElementById('eventPlayerOptions');
+    title.textContent = event.title || `${event.time1 || ''} x ${event.time2 || ''}` || 'Evento ao vivo';
+    status.style.display = 'block';
+    status.textContent = 'Consultando players disponíveis...';
+    frame.style.display = 'none';
+    frame.innerHTML = '';
+    options.innerHTML = '';
+    modal.classList.add('active');
+
+    const sourceUrl = getEventSourceUrl(event);
+    if (!sourceUrl) {
+        status.textContent = 'Este evento não informou a URL de origem para consultar os players.';
+        return;
+    }
+
+    try {
+        const data = await fetchAssistaPlayers(sourceUrl);
+        const players = Array.isArray(data.players) ? data.players.filter(player => player && player.embed) : [];
+        if (!players.length) throw new Error('Nenhum player encontrado');
+
+        status.style.display = 'none';
+        options.innerHTML = players.map((player, index) => `
+            <button class="event-player-option ${index === 0 ? 'active' : ''}" data-player-index="${index}">
+                ${escapeHtml(player.nome || `Player ${index + 1}`)}
+            </button>
+        `).join('');
+        options.querySelectorAll('.event-player-option').forEach(button => {
+            button.addEventListener('click', () => {
+                options.querySelectorAll('.event-player-option').forEach(item => item.classList.remove('active'));
+                button.classList.add('active');
+                mountEventIframe(players[Number(button.dataset.playerIndex)]?.embed, frame);
+            });
+        });
+        mountEventIframe(data.playerAtivo || players[0].embed, frame);
+    } catch (error) {
+        console.error('Erro ao consultar players:', error);
+        status.textContent = 'Não foi possível consultar os players pela API direta.';
+    }
+}
+
+function mountEventIframe(embedUrl, frame) {
+    if (!embedUrl || !/^https?:\/\//i.test(embedUrl)) return;
+    frame.innerHTML = `<iframe src="${escapeAttribute(embedUrl)}" title="Player do evento" allow="encrypted-media; picture-in-picture" allowfullscreen scrolling="no"></iframe>`;
+    frame.style.display = 'block';
+}
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value);
+}
+
+function closeEventPlayer() {
+    const modal = document.getElementById('eventPlayerModal');
+    const frame = document.getElementById('eventPlayerFrame');
+    modal.classList.remove('active');
+    frame.innerHTML = '';
+    frame.style.display = 'none';
+}
+
+function closeEventPlayerOnBackdrop(event) {
+    if (event.target.id === 'eventPlayerModal') closeEventPlayer();
 }
 
 function renderChannels(channels) {
