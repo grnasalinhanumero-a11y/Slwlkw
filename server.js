@@ -30,8 +30,8 @@ const PORT = process.env.PORT || 3000;
 // ============================================================
 const API_SOURCES = {
   rei: {
-    channels: 'https://api.reidoscanais.si/channels',
-    sports: 'https://api.reidoscanais.si/sports'
+    channels: 'https://api.reidoscanais.im/channels',
+    sports: 'https://api.reidoscanais.im/sports'
   },
   reidosembeds: {
     channels: 'https://reidosembeds.lat/api/channels',
