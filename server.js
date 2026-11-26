@@ -38,9 +38,9 @@ const API_SOURCES = {
     events: 'https://reidosembeds.lat/api/eventos'
   },
   embedtv: {
-    channels: 'https://embedtv.cc/api/channels',
-    events: 'https://embedtv.cc/api/events',
-    epg_all: 'https://embedtv.cc/api/epg_all'
+    channels: 'https://embedtv.my/api/channels',
+    events: 'https://embedtv.my/api/events',
+    epg_all: 'https://embedtv.my/api/epg_all'
   }
 };
 
